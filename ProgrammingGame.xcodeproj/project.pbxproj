@@ -15,6 +15,7 @@
 		ED0170811C786DFD00AB7529 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED01707F1C786DFD00AB7529 /* LaunchScreen.storyboard */; };
 		ED01708C1C786DFD00AB7529 /* ProgrammingGameTests.m in Sources */ = {isa = PBXBuildFile; fileRef = ED01708B1C786DFD00AB7529 /* ProgrammingGameTests.m */; };
 		ED0170971C786DFD00AB7529 /* ProgrammingGameUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = ED0170961C786DFD00AB7529 /* ProgrammingGameUITests.m */; };
+		ED0170A81C78886800AB7529 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ED0170A71C78886800AB7529 /* LoginViewController.m */; };
 		FEF25C0DC1A2C3915DAD021C /* libPods-ProgrammingGame.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 602D551A99C35A7A3BA024D3 /* libPods-ProgrammingGame.a */; };
 /* End PBXBuildFile section */
 
@@ -53,6 +54,8 @@
 		ED0170921C786DFD00AB7529 /* ProgrammingGameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ProgrammingGameUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED0170961C786DFD00AB7529 /* ProgrammingGameUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ProgrammingGameUITests.m; sourceTree = "<group>"; };
 		ED0170981C786DFD00AB7529 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		ED0170A61C78886800AB7529 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
+		ED0170A71C78886800AB7529 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		F14726CD38D6BA7C0049AB50 /* Pods-ProgrammingGame.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ProgrammingGame.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ProgrammingGame/Pods-ProgrammingGame.debug.xcconfig"; sourceTree = "<group>"; };
 		FCBD397A932D3FBC3E74E48B /* Pods-ProgrammingGame.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ProgrammingGame.release.xcconfig"; path = "Pods/Target Support Files/Pods-ProgrammingGame/Pods-ProgrammingGame.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,6 +121,8 @@
 			children = (
 				ED0170741C786DFD00AB7529 /* AppDelegate.h */,
 				ED0170751C786DFD00AB7529 /* AppDelegate.m */,
+				ED0170A61C78886800AB7529 /* LoginViewController.h */,
+				ED0170A71C78886800AB7529 /* LoginViewController.m */,
 				ED0170771C786DFD00AB7529 /* ViewController.h */,
 				ED0170781C786DFD00AB7529 /* ViewController.m */,
 				ED01707A1C786DFD00AB7529 /* Main.storyboard */,
@@ -345,6 +350,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED0170A81C78886800AB7529 /* LoginViewController.m in Sources */,
 				ED0170791C786DFD00AB7529 /* ViewController.m in Sources */,
 				ED0170761C786DFD00AB7529 /* AppDelegate.m in Sources */,
 				ED0170731C786DFD00AB7529 /* main.m in Sources */,
