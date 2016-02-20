@@ -17,6 +17,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.spaceBtn.clipsToBounds = YES;
+    self.spaceBtn.layer.cornerRadius = 5;
 
 }
 
@@ -244,14 +246,6 @@
     [self notifyParent:@"%"];
 }
 
-- (IBAction)orLine:(id)sender {
-    [self notifyParent:@"|"];
-}
-
-- (IBAction)andLetter:(id)sender {
-    [self notifyParent:@"&"];
-}
-
 - (IBAction)hyphen:(id)sender {
     [self notifyParent:@"-"];
 }
@@ -278,6 +272,10 @@
 
 - (IBAction)exclamation:(id)sender {
     [self notifyParent:@"!"];
+}
+
+- (IBAction)newLine:(id)sender {
+    [self notifyParent:@"New line"];
 }
 
 

@@ -22,6 +22,9 @@
                                              selector:@selector(receiveNotification:)
                                                  name:@"KeyboardEntry"
                                                object:nil];
+    //self.youEmoji.hidden = YES;
+    //self.youLabel.hidden = YES;
+    
 }
 
 
@@ -35,7 +38,7 @@
     if ([[notification name] isEqualToString:@"KeyboardEntry"]) {
         NSDictionary *userInfo = notification.userInfo;
         NSString *newLetter = (NSString*)[userInfo objectForKey:@"letter"];
-        if([newLetter isEqualToString:@"Space"] || [newLetter isEqualToString:@"Clear line"] || [newLetter isEqualToString:@"Tab"]) {
+        if ([newLetter length] > 1){
             [self.mainLetter setFont:[self.mainLetter.font fontWithSize:60.0]];
         } else {
             [self.mainLetter setFont:[self.mainLetter.font fontWithSize:110.0]];

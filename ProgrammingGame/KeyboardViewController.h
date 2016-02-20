@@ -10,6 +10,7 @@
 #import "ViewController.h"
 
 @interface KeyboardViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UIButton *spaceBtn;
 
 - (IBAction)tab:(id)sender;
 - (IBAction)clear:(id)sender;
@@ -62,8 +63,6 @@
 - (IBAction)rPar:(id)sender;
 - (IBAction)hashtag:(id)sender;
 - (IBAction)percent:(id)sender;
-- (IBAction)orLine:(id)sender;
-- (IBAction)andLetter:(id)sender;
 - (IBAction)hyphen:(id)sender;
 - (IBAction)colon:(id)sender;
 - (IBAction)semiColon:(id)sender;
@@ -71,5 +70,6 @@
 - (IBAction)dot:(id)sender;
 - (IBAction)comma:(id)sender;
 - (IBAction)exclamation:(id)sender;
+- (IBAction)newLine:(id)sender;
 
 @end

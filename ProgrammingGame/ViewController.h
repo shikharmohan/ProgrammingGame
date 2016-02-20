@@ -10,6 +10,12 @@
 
 @interface ViewController : UIViewController
 @property (weak, nonatomic) IBOutlet UILabel *mainLetter;
+@property (weak, nonatomic) IBOutlet UIImageView *youEmoji;
+@property (weak, nonatomic) IBOutlet UILabel *youLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *meEmoji;
+@property (weak, nonatomic) IBOutlet UILabel *meLabel;
+@property (weak, nonatomic) IBOutlet UILabel *meMask;
+@property (weak, nonatomic) IBOutlet UILabel *youMask;
 
 
 @end
