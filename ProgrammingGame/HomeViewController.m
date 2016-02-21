@@ -62,6 +62,15 @@ NSArray *keyArr;
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];
+    
+    //setup game on scenario
+    ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game", [mySession myRootRef].authData.uid]];
+    // Attach a block to read the data at our friends reference
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        [self navigateToGameVC];
+    } withCancelBlock:^(NSError *error) {
+        NSLog(@"%@", error.description);
+    }];
     [super viewDidLoad];
 }
 
@@ -231,7 +240,14 @@ NSArray *keyArr;
 #warning Incomplete implementation, return the number of rows
     return [[mySession friends] count];
 }
-
+-(void)navigateToGameVC {
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
+                                                             bundle: nil];
+    
+    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+    
+    [self.navigationController pushViewController:controller animated:YES];
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     FriendsTableViewCell *customCell = [self.tableView dequeueReusableCellWithIdentifier:@"myCell" forIndexPath:indexPath];
@@ -245,6 +261,18 @@ NSArray *keyArr;
 }
 
 
+
+
+-(void)setUpGame:(NSString*)friendUsername withUid:(NSString*)uid withRef:(Firebase*)ref{
+    
+        NSDictionary *status = @{
+                                 @"uid": uid,
+                                 @"name" : friendUsername
+                                 };
+    [[ref childByAppendingPath:@"/game"] updateChildValues:status];
+}
+
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     
@@ -255,6 +283,7 @@ NSArray *keyArr;
     NSString *myUsername = [mySession nickname];
     NSString *friendUsername = cell.friendLabel.text;
     
+    
     if ([cell.statusMessage.text isEqualToString:statusMessages[@"2"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"1"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) {
         //get friend's list to see if he sent a request to us
         Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
@@ -264,6 +293,7 @@ NSArray *keyArr;
                 s = @"2";
             } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
                 s = @"5";
+                [self setUpGame:myUsername withUid:myUid withRef:[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]];
             } else { //you are sending a game request
                 s = @"4";
             }
@@ -287,6 +317,7 @@ NSArray *keyArr;
                 s = @"2";
             } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
                 s = @"5";
+                [self setUpGame:friendUsername withUid:friendUid withRef:[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]];
             } else { //you are sending a game request
                 s = @"3";
             }
@@ -304,6 +335,7 @@ NSArray *keyArr;
 
 
     }
+    
     
     
 }
