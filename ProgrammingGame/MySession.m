@@ -29,15 +29,12 @@
         myRootRef = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
         nickname = @"";
         if ([nickname isEqualToString:@""] && myRootRef.authData) {
-            NSString *url = [NSString stringWithFormat:@"https://programminggame.firebaseio.com/users/%@", myRootRef.authData.uid];
-            NSLog(@"uid: %@ - url %@", myRootRef.authData.uid, url);
-            Firebase *ref = [[Firebase alloc] initWithUrl: url];
-            __block NSString *val;
+            Firebase *ref = [[Firebase alloc] initWithUrl: [NSString stringWithFormat:@"https://programminggame.firebaseio.com/users/%@", myRootRef.authData.uid]];
             [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                val = snapshot.value[@"nickname"];
-                NSLog(@"Nickname snapshot: %@", snapshot.value[@"nickname"]);
-                nickname = val;
-                [[NSNotificationCenter defaultCenter] postNotificationName: @"nicknameChanged" object:nil];
+                nickname = snapshot.value[@"nickname"];
+                if (![nickname isEqualToString:@""]) {
+                    [[NSNotificationCenter defaultCenter] postNotificationName: @"nicknameChanged" object:nil];
+                }
             }];
         }
         

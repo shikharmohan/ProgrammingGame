@@ -13,5 +13,6 @@
 - (IBAction)addFriendPressed:(id)sender;
 - (IBAction)logoutPressed:(id)sender;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIButton *addFriend;
 
 @end

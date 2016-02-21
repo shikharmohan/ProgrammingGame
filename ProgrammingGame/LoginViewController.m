@@ -42,7 +42,7 @@
     self.passwordTextField.text = @"";
     self.nicknameLabel.text = @"";
     
-    [self.loginButton setTitle:@"Login" forState:UIControlStateNormal];
+    [self.loginButton setTitle:@"Sign Up" forState:UIControlStateNormal];
     self.errorMessageLabel.hidden = YES;
     
     self.nicknameLabel.alpha = 0;
@@ -159,7 +159,7 @@
             self.passwordTextField.text = @"";
             self.usernameTextField.text = @"";
         } else {
-            NSLog(@"Auth Data - %@", authData);
+            NSLog(@"Nickname %@ - Auth Data - %@", nickname, authData);
             if (nickname) {
                 NSDictionary *newUser = @{
                                           @"nickname":nickname
@@ -167,9 +167,9 @@
                 [[[[mySession myRootRef] childByAppendingPath:@"users"]
                   childByAppendingPath:authData.uid] setValue:newUser];
                 [mySession setNickname:nickname];
+                [[NSNotificationCenter defaultCenter] postNotificationName: @"nicknameChanged" object:nil];
             } else {
-                NSString *nickname = [mySession nickname];
-                if ([nickname isEqualToString:@""]) {
+                if ([[mySession nickname] isEqualToString:@""]) {
                     Firebase *ref = [[Firebase alloc] initWithUrl: [NSString stringWithFormat:@"https://programminggame.firebaseio.com/users/%@", [mySession myRootRef].authData.uid]];
                     [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
                         [mySession setNickname:snapshot.value[@"nickname"]];

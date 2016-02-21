@@ -22,9 +22,11 @@
                                              selector:@selector(receiveNotification:)
                                                  name:@"nicknameChanged"
                                                object:nil];
+    self.addFriend.clipsToBounds = YES;
+    self.addFriend.layer.cornerRadius = 5;
+    self.nicknameLabel.text = [mySession nickname];
     [super viewDidLoad];
 }
-
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -34,7 +36,7 @@
 - (void) receiveNotification:(NSNotification *) notification
 {
     if ([[notification name] isEqualToString:@"nicknameChanged"]) {
-        NSLog(@"recieved notif");
+        NSLog(@"Recieved nickname changed notif");
         self.nicknameLabel.text = [mySession nickname];
     }
 }
@@ -64,7 +66,7 @@
 -(void)clearMemory {
     [mySession setFriends:nil];
     [mySession setNickname:@""];
-    [[NSNotificationCenter defaultCenter] postNotificationName: @"nicknameChanged" object:nil];
+    self.nicknameLabel.text = @"";
 }
 
 - (IBAction)logoutPressed:(id)sender {
