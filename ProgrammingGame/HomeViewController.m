@@ -47,16 +47,17 @@ NSDictionary *statusMessages;
     statusMessages = @{
         @"0": @"friend request sent",
         @"1" : @"accept friend request",
-        @"2" : @"",
+        @"2" : @"friends",
         @"3": @"game request sent",
         @"4": @"accept game request"
         };
     
     //retrieve friends:
-    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData]];
-    // Attach a block to read the data at our posts reference
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData.uid]];
+    // Attach a block to read the data at our friends reference
     [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-        NSLog(@"%@", snapshot.value);
+        [self getFriendsArray];
+        NSLog(@"UPDATE FRIEND CHANGED %@", snapshot.value);
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];

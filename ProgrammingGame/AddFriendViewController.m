@@ -77,55 +77,62 @@
                 NSString *friendUsername = self.usernameTextField.text;
                 
                 
-                //get my file to see if I have already sent a request to friend
-                __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
-                [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                    NSString *s = @"0";
-                    NSLog(@"Shana snpahsot %@", snapshot);
-                    if (snapshot.value[friendUsername]) {//if i have already added him as a friend
-                        s = snapshot.value[@"status"];
-                    }
-                    
-                    NSDictionary *status = @{
-                               @"status": @"0",
-                               @"uid" : friendUid
-                               };
-                    NSDictionary *newFriend = @{
-                                  friendUsername: status
-                                  };
-                    [myRef updateChildValues:newFriend];
-                    
-                    myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid];
-                    //update friend array
-                    [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                        [mySession setFriends:snapshot.value[@"friends"]];
-                        NSLog(@"friends array updated: %@", [mySession friends]);
-                        [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
-                    }];
-                    self.usernameTextField.text = @"";
-                    self.errorMessage.text = @" added!";
-                    self.errorMessage.hidden = NO;
-                    [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
-                    
-                }];
-                
+                __block bool shouldBeTwo = NO;
                 //get friend's list to see if he sent a request to us
                 Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
                 [friendsRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
                     NSString *s = @"1";
                     if (snapshot.value[myUsername]) {//if he has added you as a friend
                         s = @"2";
+                        shouldBeTwo = YES;
                     }
                     NSDictionary *status = @{
-                               @"status": s,
-                               @"uid" : myUid
-                               };
+                                             @"status": s,
+                                             @"uid" : myUid
+                                             };
                     NSDictionary *newFriend = @{
-                                  myUsername: status
-                                  };
+                                                myUsername: status
+                                                };
                     [friendsRef updateChildValues:newFriend];
                     
+                    //get my file to see if I have already sent a request to friend
+                    __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
+                    [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                        NSString *s = @"0";
+                        NSLog(@"Shana snpahsot %@", snapshot);
+                        if (shouldBeTwo) {
+                            s = @"2";
+                        } else if (snapshot.value[friendUsername]) {//if i have already added him as a friend
+                            s = snapshot.value[friendUsername][@"status"];
+                        }
+                        
+                        NSDictionary *status = @{
+                                                 @"status": s,
+                                                 @"uid" : friendUid
+                                                 };
+                        NSDictionary *newFriend = @{
+                                                    friendUsername: status
+                                                    };
+                        [myRef updateChildValues:newFriend];
+                        
+                        myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid];
+                        //update friend array
+                        [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                            [mySession setFriends:snapshot.value[@"friends"]];
+                            NSLog(@"friends array updated: %@", [mySession friends]);
+                            [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
+                        }];
+                        self.usernameTextField.text = @"";
+                        self.errorMessage.text = @" added!";
+                        self.errorMessage.hidden = NO;
+                        [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
+                        
+                    }];
+                    
                 }];
+                
+                
+                
                 
                 
             }
