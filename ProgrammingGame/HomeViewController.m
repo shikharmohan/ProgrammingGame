@@ -22,8 +22,6 @@
                                              selector:@selector(receiveNotification:)
                                                  name:@"nicknameChanged"
                                                object:nil];
-    self.addFriend.clipsToBounds = YES;
-    self.addFriend.layer.cornerRadius = 5;
     self.nicknameLabel.text = [mySession nickname];
     [super viewDidLoad];
 }

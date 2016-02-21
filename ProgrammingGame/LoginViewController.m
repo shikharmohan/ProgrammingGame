@@ -28,7 +28,6 @@
     self.passwordTextField.delegate = self;
     self.nicknameLabel.delegate = self;
     self.passwordTextField.secureTextEntry = YES;
-    
     // Do any additional setup after loading the view.
 }
 
@@ -38,10 +37,8 @@
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-    self.usernameTextField.text = @"";
-    self.passwordTextField.text = @"";
-    self.nicknameLabel.text = @"";
-    
+    [self clearTextFields];
+    self.titleLabel.text = @"Login";
     [self.loginButton setTitle:@"Sign Up" forState:UIControlStateNormal];
     self.errorMessageLabel.hidden = YES;
     
@@ -52,6 +49,12 @@
     self.confirmButton.transform = CGAffineTransformMakeTranslation(0, 0);
     
     [self resignKeyboards];
+}
+
+-(void) clearTextFields {
+    self.usernameTextField.text = @"";
+    self.passwordTextField.text = @"";
+    self.nicknameLabel.text = @"";
 }
 
 /*
@@ -125,9 +128,10 @@
     self.errorMessageLabel.hidden = YES;
     if ([self.titleLabel.text isEqualToString:@"Sign Up"]) {
         self.titleLabel.text = @"Login";
+        [self clearTextFields];
         [self signUpTransitionUp];
         [self.loginButton setEnabled:NO];
-        [self.loginButton setTitle:@"Log In" forState:UIControlStateNormal];
+        [self.loginButton setTitle:@"Sign up" forState:UIControlStateNormal];
     } else {
         self.titleLabel.text = @"Sign Up";
         [self signUpTransitionDown];
@@ -161,6 +165,14 @@
         } else {
             NSLog(@"Nickname %@ - Auth Data - %@", nickname, authData);
             if (nickname) {
+                Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: @"usersRef"];
+                
+                NSDictionary *updatedDict = @{
+                                           nickname: authData.uid,
+                                           };
+                [usersRef updateChildValues: updatedDict];
+                
+                
                 NSDictionary *newUser = @{
                                           @"nickname":nickname
                                           };
@@ -207,23 +219,16 @@
          NSLog(@"Successfully created user account with uid: %@", uid);
          self.errorMessageLabel.text = @"Sign up Successful";
          self.errorMessageLabel.hidden = NO;
+         
          [self loginUser:self.nicknameLabel.text];
      }
  }];
     [self.confirmButton setEnabled:YES];
 }
 
-- (IBAction)didConfirm:(id)sender {
-    [self resignKeyboards];
-    [self.confirmButton setEnabled:NO];
-    bool shouldStop = NO;
-    
-    if ([self.titleLabel.text isEqual:@"Sign Up"]) {
-        shouldStop= [self.nicknameLabel.text isEqualToString:@""];
-    }
-    
+-(void) errorSignUpLogin:(bool)shouldStop withMessage:(NSString*)errorMessage {
     if ([self.passwordTextField.text isEqualToString:@""] || [self.usernameTextField.text isEqualToString:@""]|| shouldStop) {
-        self.errorMessageLabel.text = @"Please fill out all fields";
+        self.errorMessageLabel.text = errorMessage;
         self.errorMessageLabel.hidden = NO;
         [self.confirmButton setEnabled:YES];
     } else if ([self.titleLabel.text isEqual:@"Login"]) {
@@ -231,6 +236,31 @@
     } else {
         [self signUpUser];
     }
+}
+
+- (IBAction)didConfirm:(id)sender {
+    [self resignKeyboards];
+    [self.confirmButton setEnabled:NO];
+    if ([self.titleLabel.text isEqual:@"Sign Up"]) {
+        if ([self.nicknameLabel.text isEqualToString:@""]) {
+            [self errorSignUpLogin:YES withMessage:@"Please fill out all fields"];
+        } else {
+            Firebase *ref = [[Firebase alloc] initWithUrl: @"https://programminggame.firebaseio.com/usersRef"];
+            [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                if (!snapshot.value[self.nicknameLabel.text]) {
+                    [self errorSignUpLogin:NO withMessage:@"Please fill out all fields"];
+                } else {
+                    [self errorSignUpLogin:YES withMessage:@"Username already in use"];
+                    [self clearTextFields];
+                }
+            }];
+        }
+        
+    }else {
+        [self errorSignUpLogin:NO withMessage:@"Please fill out all fields"];
+    }
+    
+    
     
 }
 @end

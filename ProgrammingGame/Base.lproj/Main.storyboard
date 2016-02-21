@@ -195,7 +195,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="92" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="izS-Ry-e6H">
-                                <rect key="frame" x="0.0" y="256" width="375" height="411"/>
+                                <rect key="frame" x="0.0" y="280" width="375" height="387"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" rowHeight="92" id="Ioh-VO-s22">
@@ -217,7 +217,7 @@
                                 </prototypes>
                             </tableView>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="you.png" translatesAutoresizingMaskIntoConstraints="NO" id="TJ6-C4-IWS">
-                                <rect key="frame" x="152" y="112" width="70" height="70"/>
+                                <rect key="frame" x="152" y="125" width="70" height="70"/>
                             </imageView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JSY-rI-uIX">
                                 <rect key="frame" x="17" y="30" width="52" height="30"/>
@@ -236,9 +236,9 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fgS-V6-l2y">
-                                <rect key="frame" x="20" y="218" width="335" height="40"/>
+                                <rect key="frame" x="-3" y="227" width="300" height="45"/>
                                 <color key="backgroundColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="17"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="18"/>
                                 <state key="normal" title="Add Friend">
                                     <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
@@ -246,13 +246,26 @@
                                     <action selector="addFriendPressed:" destination="vlz-OL-dLf" eventType="touchUpInside" id="0Py-hT-YxR"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="G2O-l6-x8B">
+                                <rect key="frame" x="254" y="225" width="43" height="45"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-UltraLight" family="Helvetica Neue" pointSize="39"/>
+                                <state key="normal" title="+">
+                                    <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                            </button>
+                            <containerView hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3dq-LA-wUO">
+                                <rect key="frame" x="-1" y="272" width="298" height="145"/>
+                                <connections>
+                                    <segue destination="mGQ-yK-9YV" kind="embed" id="jea-09-bAK"/>
+                                </connections>
+                            </containerView>
                         </subviews>
                         <color key="backgroundColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
                     <navigationItem key="navigationItem" id="5QO-hb-dJ1"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
-                        <outlet property="addFriend" destination="fgS-V6-l2y" id="vdi-AS-zoD"/>
+                        <outlet property="addFriend" destination="G2O-l6-x8B" id="dCa-0n-XUx"/>
                         <outlet property="nicknameLabel" destination="TZi-jJ-vje" id="424-ae-GT5"/>
                         <outlet property="tableView" destination="izS-Ry-e6H" id="Rf3-qt-M7l"/>
                     </connections>
@@ -875,6 +888,33 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HCS-9f-BGO" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1397.5" y="585.5"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="FQx-4C-XDU">
+            <objects>
+                <viewController id="mGQ-yK-9YV" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="eam-Dj-s80">
+                        <rect key="frame" x="0.0" y="0.0" width="298" height="145"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="USERNAME" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="X9O-0l-JlW">
+                                <rect key="frame" x="20" y="46" width="258" height="30"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHd-ld-hU9">
+                                <rect key="frame" x="248" y="92" width="30" height="30"/>
+                                <state key="normal" title="Add">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="0.9160948057432432" colorSpace="calibratedRGB"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UHI-pu-kP6" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="232" y="1049"/>
         </scene>
     </scenes>
     <resources>
