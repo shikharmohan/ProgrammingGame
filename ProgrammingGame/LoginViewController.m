@@ -180,7 +180,6 @@
                                           @"nickname":nickname,
                                           @"friends": tempFriends
                                           };
-                NSLog(@"Shana dict %@", newUser);
                 [[[[mySession myRootRef] childByAppendingPath:@"users"]
                   childByAppendingPath:authData.uid] setValue:newUser];
                 [mySession setNickname:nickname];

@@ -20,6 +20,7 @@
 bool isContainerOpen;
 int numFriends;
 NSDictionary *statusMessages;
+NSArray *keyArr;
 
 - (void)viewDidLoad {
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -49,7 +50,8 @@ NSDictionary *statusMessages;
         @"1" : @"accept friend request",
         @"2" : @"friends",
         @"3": @"game request sent",
-        @"4": @"accept game request"
+        @"4": @"accept game request",
+        @"5" : @"GAME ON"
         };
     
     //retrieve friends:
@@ -57,7 +59,6 @@ NSDictionary *statusMessages;
     // Attach a block to read the data at our friends reference
     [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
         [self getFriendsArray];
-        NSLog(@"UPDATE FRIEND CHANGED %@", snapshot.value);
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];
@@ -73,24 +74,43 @@ NSDictionary *statusMessages;
     //update friend array
     Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@", [mySession myRootRef].authData.uid]];
     [usersRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-        NSLog(@"Shana snapshot - %@", snapshot);
         [mySession setFriends:snapshot.value[@"friends"]];
         [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
     }];
 
 }
 
+- (void) sortDictionary {
+    NSArray *myArray  = [[mySession friends] keysSortedByValueUsingComparator: ^(NSDictionary *obj1, NSDictionary *obj2) {
+        
+        if ([obj1[@"status"] intValue] > [obj2[@"status"] intValue]) {
+            
+            return (NSComparisonResult)NSOrderedAscending;
+        }
+        if ([obj1[@"status"] intValue] < [obj2[@"status"] intValue]) {
+            
+            return (NSComparisonResult)NSOrderedDescending;
+        }
+        
+        return (NSComparisonResult)NSOrderedSame;
+    }];
+    keyArr = myArray;
+}
+
 - (void) receiveNotification:(NSNotification *) notification
 {
     if ([[notification name] isEqualToString:@"nicknameChanged"]) {
-        NSLog(@"Recieved nickname changed notif");
+        NSLog(@"Receivved nickname changed notif");
         self.nicknameLabel.text = [mySession nickname];
         [self getFriendsArray];
         
     } else if ([[notification name] isEqualToString:@"friendsChanged"]) {
+        NSLog(@"Receivved friends arr changed notif");
         [[mySession friends] removeObjectForKey:[mySession nickname]];
+        [self sortDictionary];
         [self.tableView reloadData];
     } else if ([[notification name] isEqualToString:@"friendAdded"]) {
+        NSLog(@"Receivved friends added notif");
         [self closeContainer];
     }
 }
@@ -130,7 +150,7 @@ NSDictionary *statusMessages;
                          viewB.frame = CGRectMake( self.addFriendView.frame.origin.x,
                                                                self.addFriendView.frame.origin.y,
                                                                self.addFriendView.frame.size.width,
-                                                               self.addFriendView.frame.size.height + 145);
+                                                               self.addFriendView.frame.size.height + 80);
                      }
                      completion:^(BOOL finished){
                          [self.addFriendLogo setEnabled:YES];
@@ -156,7 +176,7 @@ NSDictionary *statusMessages;
                          self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
                                                                self.addFriendView.frame.origin.y,
                                                                self.addFriendView.frame.size.width,
-                                                               self.addFriendView.frame.size.height - 145);
+                                                               self.addFriendView.frame.size.height - 80);
                      }
                      completion:^(BOOL finished){
                          [self.logoutButton setUserInteractionEnabled:YES];
@@ -209,7 +229,6 @@ NSDictionary *statusMessages;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 #warning Incomplete implementation, return the number of rows
-    NSLog(@"Shana - count %lu", (unsigned long)[[mySession friends] count]);
     return [[mySession friends] count];
 }
 
@@ -217,9 +236,9 @@ NSDictionary *statusMessages;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     FriendsTableViewCell *customCell = [self.tableView dequeueReusableCellWithIdentifier:@"myCell" forIndexPath:indexPath];
     
-    NSArray *keys = [[mySession friends] allKeys];
-    NSString *aKey = [keys objectAtIndex:[indexPath row]];
+    NSString *aKey = [keyArr objectAtIndex:[indexPath row]];
     customCell.friendLabel.text = aKey;
+    NSLog(@"Message status %@", [mySession friends][aKey][@"status"]);
     NSString *msg = statusMessages[[mySession friends][aKey][@"status"]];
     customCell.statusMessage.text = msg;
     return customCell;
@@ -230,37 +249,63 @@ NSDictionary *statusMessages;
 {
     
     FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    //add friend request to my file
+    NSString *myUid = [mySession myRootRef].authData.uid;
+    NSString *friendUid = [mySession friends][cell.friendLabel.text][@"uid"];
+    NSString *myUsername = [mySession nickname];
+    NSString *friendUsername = cell.friendLabel.text;
+    
+    if ([cell.statusMessage.text isEqualToString:statusMessages[@"2"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"1"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) {
+        //get friend's list to see if he sent a request to us
+        Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
+        [friendsRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+            NSString *s;
+            if ([cell.statusMessage.text isEqualToString:statusMessages[@"1"]]) { //you are accepting his friend request
+                s = @"2";
+            } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
+                s = @"5";
+            } else { //you are sending a game request
+                s = @"4";
+            }
+           
+            NSDictionary *status = @{
+                                     @"status": s,
+                                     @"uid" : myUid
+                                     };
+            NSDictionary *newFriend = @{
+                                        myUsername: status
+                                        };
+            [friendsRef updateChildValues:newFriend];
+            
+        }];
+        
+        //get my file to see if I have already sent a request to friend
+        __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
+        [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+            NSString *s;
+            if ([cell.statusMessage.text isEqualToString:statusMessages[@"1"]]) { //you are accepting his friend request
+                s = @"2";
+            } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
+                s = @"5";
+            } else { //you are sending a game request
+                s = @"3";
+            }
+            
+            NSDictionary *status = @{
+                                     @"status": s,
+                                     @"uid" : friendUid
+                                     };
+            NSDictionary *newFriend = @{
+                                        friendUsername: status
+                                        };
+            [myRef updateChildValues:newFriend];
+            
+        }];
+
+
+    }
     
     
-   /* FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    NSString *uid = [mySession friends][cell.friendLabel.text];
-    //add game to your own file
-    Firebase *ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid]  childByAppendingPath:@"games"];
-    //0 is he asked you, 1 you asked him, 2 you are both ready
-    NSDictionary *status = @{
-                             @"status": @"0",
-                             @"nickname" : cell.friendLabel.text
-                             };
-    NSDictionary *games = @{
-                            uid: status
-                            };
-    NSLog(@"game values updated %@", games);
-    [ref updateChildValues:games];
-    
-    //add game to friend's file
-    ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:uid]  childByAppendingPath:@"games"];
-    
-    //-1 is no game, 0 is he asked you, 1 you asked him, 2 you are both ready
-    status = @{
-                 @"status": @"0",
-                 @"nickname" : [mySession nickname]
-                 };
-    games = @{
-                            [mySession myRootRef].authData.uid: status
-                            };
-    NSLog(@"game values updated for friend %@", games);
-    [ref updateChildValues:games];
-    cell.statusMessage.text = @"game request sent";*/
 }
 
 @end

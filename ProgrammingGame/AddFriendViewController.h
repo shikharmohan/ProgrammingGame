@@ -10,10 +10,8 @@
 #import <Firebase/Firebase.h>
 
 @interface AddFriendViewController : UIViewController 
-@property (weak, nonatomic) IBOutlet UILabel *bckLabel;
 @property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
 - (IBAction)addFriend:(id)sender;
 @property (weak, nonatomic) IBOutlet UILabel *errorMessage;
-@property (weak, nonatomic) IBOutlet UIImageView *errorEmoji;
 
 @end

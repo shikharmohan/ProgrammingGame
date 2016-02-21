@@ -19,8 +19,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self.bckLabel.layer setCornerRadius:10];
-    self.bckLabel.layer.masksToBounds = YES;
     self.usernameTextField.delegate = self;
     // Do any additional setup after loading the view.
 }
@@ -67,7 +65,7 @@
         [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
             if (!snapshot.value[self.usernameTextField.text]) { //aka the name is not found
                 self.usernameTextField.text = @"";
-                self.errorMessage.text = @"'s username not found";
+                self.errorMessage.text = @"Username not found";
                 self.errorMessage.hidden = NO;
             } else {
                 //add friend request to my file
@@ -99,7 +97,6 @@
                     __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
                     [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
                         NSString *s = @"0";
-                        NSLog(@"Shana snpahsot %@", snapshot);
                         if (shouldBeTwo) {
                             s = @"2";
                         } else if (snapshot.value[friendUsername]) {//if i have already added him as a friend
@@ -115,15 +112,8 @@
                                                     };
                         [myRef updateChildValues:newFriend];
                         
-                        myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid];
-                        //update friend array
-                        [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                            [mySession setFriends:snapshot.value[@"friends"]];
-                            NSLog(@"friends array updated: %@", [mySession friends]);
-                            [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
-                        }];
                         self.usernameTextField.text = @"";
-                        self.errorMessage.text = @" added!";
+                        self.errorMessage.text = @"Friend added!";
                         self.errorMessage.hidden = NO;
                         [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
                         
@@ -138,7 +128,7 @@
             }
         }];
     }
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         self.errorMessage.hidden = YES;
     });
     
