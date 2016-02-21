@@ -11,12 +11,12 @@
 
 @interface MySession : NSObject {
     NSString *nickname;
-    NSMutableArray *friends;
+    NSMutableDictionary *friends;
     Firebase *myRootRef;
 }
 
 @property (strong, nonatomic) NSString* nickname;
-@property (strong, nonatomic) NSMutableArray *friends;
+@property (strong, nonatomic) NSMutableDictionary *friends;
 @property (strong) Firebase *myRootRef;
 + (id)sharedManager;
 

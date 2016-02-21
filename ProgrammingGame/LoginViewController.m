@@ -166,9 +166,10 @@
             NSLog(@"Nickname %@ - Auth Data - %@", nickname, authData);
             if (nickname) {
                 Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: @"usersRef"];
-                
+                NSDictionary *friendsDict = [[NSDictionary alloc] init];
                 NSDictionary *updatedDict = @{
                                            nickname: authData.uid,
+                                           @"friends": friendsDict
                                            };
                 [usersRef updateChildValues: updatedDict];
                 
@@ -241,7 +242,7 @@
 - (IBAction)didConfirm:(id)sender {
     [self resignKeyboards];
     [self.confirmButton setEnabled:NO];
-    if ([self.titleLabel.text isEqual:@"Sign Up"]) {
+    if ([self.titleLabel.text isEqual:@"Sign Up"]) {//wants to sign up
         if ([self.nicknameLabel.text isEqualToString:@""]) {
             [self errorSignUpLogin:YES withMessage:@"Please fill out all fields"];
         } else {

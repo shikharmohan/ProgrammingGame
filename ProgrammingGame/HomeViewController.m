@@ -26,6 +26,9 @@ bool isContainerOpen;
     self.nicknameLabel.text = [mySession nickname];
     self.addFriendView.translatesAutoresizingMaskIntoConstraints = YES;
     isContainerOpen = NO;
+    self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
+                             self.addFriendView.frame.origin.y,
+                             self.addFriendView.frame.size.width,0);
     [super viewDidLoad];
 }
 
@@ -62,10 +65,12 @@ bool isContainerOpen;
 }
 
 -(void) openContainer {
+    self.addFriendView.hidden = NO;
     [self.addFriendLogo setTitle:@"x" forState:UIControlStateNormal];
+    UIView* viewB = [[self.childViewControllers.lastObject view] superview];
     [UIView animateWithDuration:1.0
                      animations:^{
-                         self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
+                         viewB.frame = CGRectMake( self.addFriendView.frame.origin.x,
                                                                self.addFriendView.frame.origin.y,
                                                                self.addFriendView.frame.size.width,
                                                                self.addFriendView.frame.size.height + 145);
@@ -73,11 +78,17 @@ bool isContainerOpen;
                      completion:^(BOOL finished){
                          [self.addFriendLogo setEnabled:YES];
                          isContainerOpen = YES;
+                         viewB.userInteractionEnabled = YES;
                          // whatever you need to do when animations are complete
                      }];
 }
 
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self.view endEditing:YES];
+}
+
 -(void)closeContainer {
+    [self.view endEditing:YES];
     [self.addFriendLogo setTitle:@"+" forState:UIControlStateNormal];
     [UIView animateWithDuration:1.0
                      animations:^{
@@ -90,6 +101,7 @@ bool isContainerOpen;
                          [self.addFriendLogo setEnabled:YES];
                          [self.addFriend setEnabled:YES];
                          isContainerOpen = NO;
+                         self.addFriendView.hidden = YES;
                          // whatever you need to do when animations are complete
                      }];
 }

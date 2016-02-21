@@ -25,7 +25,7 @@
 
 - (id)init {
     if (self = [super init]) {
-        friends = [[NSMutableArray alloc] init];
+        friends = [[NSMutableDictionary alloc] init];
         myRootRef = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
         nickname = @"";
         if ([nickname isEqualToString:@""] && myRootRef.authData) {

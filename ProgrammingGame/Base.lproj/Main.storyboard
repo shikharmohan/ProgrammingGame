@@ -236,7 +236,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <containerView autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3dq-LA-wUO">
-                                <rect key="frame" x="0.0" y="262" width="300" height="0.0"/>
+                                <rect key="frame" x="0.0" y="262" width="300" height="145"/>
                                 <connections>
                                     <segue destination="mGQ-yK-9YV" kind="embed" id="jea-09-bAK"/>
                                 </connections>
@@ -900,7 +900,7 @@
             <objects>
                 <viewController id="mGQ-yK-9YV" customClass="AddFriendViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="eam-Dj-s80">
-                        <rect key="frame" x="0.0" y="0.0" width="300" height="0.0"/>
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="145"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VR5-xo-KsJ">
@@ -910,24 +910,39 @@
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHd-ld-hU9">
+                                <rect key="frame" x="248" y="96" width="30" height="30"/>
+                                <state key="normal" title="Add">
+                                    <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="addFriend:" destination="mGQ-yK-9YV" eventType="touchUpInside" id="wDg-KE-n9i"/>
+                                </connections>
+                            </button>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="'s nickname not found" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AR2-du-sau">
+                                <rect key="frame" x="50" y="22" width="155" height="21"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="15"/>
+                                <color key="textColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <imageView hidden="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="me.png" translatesAutoresizingMaskIntoConstraints="NO" id="A12-xi-hgi">
+                                <rect key="frame" x="21" y="18" width="25" height="25"/>
+                            </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="USERNAME" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="X9O-0l-JlW">
-                                <rect key="frame" x="20" y="46" width="258" height="30"/>
+                                <rect key="frame" x="20" y="57" width="258" height="30"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="tintColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 <color key="textColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHd-ld-hU9">
-                                <rect key="frame" x="248" y="92" width="30" height="30"/>
-                                <state key="normal" title="Add">
-                                    <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                            </button>
                         </subviews>
                     </view>
                     <connections>
                         <outlet property="bckLabel" destination="VR5-xo-KsJ" id="sRe-xO-QCT"/>
+                        <outlet property="errorEmoji" destination="A12-xi-hgi" id="5rs-fZ-vgV"/>
+                        <outlet property="errorMessage" destination="AR2-du-sau" id="acl-ds-Luc"/>
+                        <outlet property="usernameTextField" destination="X9O-0l-JlW" id="Jx0-gw-uh3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UHI-pu-kP6" userLabel="First Responder" sceneMemberID="firstResponder"/>
