@@ -17,5 +17,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *addFriendLogo;
 @property (weak, nonatomic) IBOutlet UIView *addFriendView;
 - (IBAction)addCancellPressed:(id)sender;
+@property (weak, nonatomic) IBOutlet UIButton *logoutButton;
 
+@property (weak, nonatomic) IBOutlet UILabel *opaqueMask;
 @end

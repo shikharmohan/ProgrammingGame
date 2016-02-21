@@ -29,6 +29,10 @@ int numFriends;
                                              selector:@selector(receiveNotification:)
                                                  name:@"friendsChanged"
                                                object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receiveNotification:)
+                                                 name:@"friendAdded"
+                                               object:nil];
     self.nicknameLabel.text = [mySession nickname];
     self.addFriendView.translatesAutoresizingMaskIntoConstraints = YES;
     isContainerOpen = NO;
@@ -64,6 +68,8 @@ int numFriends;
         
     } else if ([[notification name] isEqualToString:@"friendsChanged"]) {
         [self.tableView reloadData];
+    } else if ([[notification name] isEqualToString:@"friendAdded"]) {
+        [self closeContainer];
     }
 }
 
@@ -87,6 +93,13 @@ int numFriends;
 }
 
 -(void) openContainer {
+    [self.logoutButton setUserInteractionEnabled:NO];
+    [self.tableView setUserInteractionEnabled:NO];
+    [UIView animateWithDuration:0.5
+                     animations:^{
+                         self.opaqueMask.alpha = 1;
+                     }];
+    
     self.addFriendView.hidden = NO;
     [self.addFriendLogo setTitle:@"x" forState:UIControlStateNormal];
     UIView* viewB = [[self.childViewControllers.lastObject view] superview];
@@ -112,6 +125,10 @@ int numFriends;
 -(void)closeContainer {
     [self.view endEditing:YES];
     [self.addFriendLogo setTitle:@"+" forState:UIControlStateNormal];
+    [UIView animateWithDuration:0.5
+                     animations:^{
+                         self.opaqueMask.alpha = 0;
+                     }];
     [UIView animateWithDuration:1.0
                      animations:^{
                          self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
@@ -120,6 +137,8 @@ int numFriends;
                                                                self.addFriendView.frame.size.height - 145);
                      }
                      completion:^(BOOL finished){
+                         [self.logoutButton setUserInteractionEnabled:YES];
+                         [self.tableView setUserInteractionEnabled:YES];
                          [self.addFriendLogo setEnabled:YES];
                          [self.addFriend setEnabled:YES];
                          isContainerOpen = NO;
@@ -179,6 +198,12 @@ int numFriends;
     NSString *aKey = [keys objectAtIndex:[indexPath row]];
     customCell.friendLabel.text = aKey;
     return customCell;
+}
+
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath
+                    animated:(BOOL)animated
+              scrollPosition:(UITableViewScrollPosition)scrollPosition {
+    
 }
 
 @end

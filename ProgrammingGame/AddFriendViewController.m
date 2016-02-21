@@ -82,7 +82,8 @@
                 }];
                 self.usernameTextField.text = @"";
                 self.errorMessage.text = @" added!";
-                
+                self.errorMessage.hidden = NO;
+                [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
             }
         }];
     }

@@ -294,6 +294,7 @@
 				TargetAttributes = {
 					ED01706D1C786DFD00AB7529 = {
 						CreatedOnToolsVersion = 7.2.1;
+						DevelopmentTeam = E2L5G3LYSL;
 					};
 					ED0170861C786DFD00AB7529 = {
 						CreatedOnToolsVersion = 7.2.1;
@@ -555,6 +556,7 @@
 			baseConfigurationReference = F14726CD38D6BA7C0049AB50 /* Pods-ProgrammingGame.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ProgrammingGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shanaazriadev.ProgrammingGame;
@@ -567,6 +569,7 @@
 			baseConfigurationReference = FCBD397A932D3FBC3E74E48B /* Pods-ProgrammingGame.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = ProgrammingGame/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = shanaazriadev.ProgrammingGame;
