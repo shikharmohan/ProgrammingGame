@@ -78,7 +78,7 @@
                 
                 
                 //get my file to see if I have already sent a request to friend
-                Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
+                __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
                 [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
                     NSString *s = @"0";
                     NSLog(@"Shana snpahsot %@", snapshot);
@@ -94,6 +94,18 @@
                                   friendUsername: status
                                   };
                     [myRef updateChildValues:newFriend];
+                    
+                    myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid];
+                    //update friend array
+                    [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                        [mySession setFriends:snapshot.value[@"friends"]];
+                        NSLog(@"friends array updated: %@", [mySession friends]);
+                        [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
+                    }];
+                    self.usernameTextField.text = @"";
+                    self.errorMessage.text = @" added!";
+                    self.errorMessage.hidden = NO;
+                    [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
                     
                 }];
                 
@@ -115,17 +127,7 @@
                     
                 }];
                 
-                myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid];
-                //update friend array
-                [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                        [mySession setFriends:snapshot.value[@"friends"]];
-                        NSLog(@"friends array updated: %@", [mySession friends]);
-                        [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
-                }];
-                self.usernameTextField.text = @"";
-                self.errorMessage.text = @" added!";
-                self.errorMessage.hidden = NO;
-                [[NSNotificationCenter defaultCenter] postNotificationName: @"friendAdded" object:nil];
+                
             }
         }];
     }

@@ -227,6 +227,10 @@ NSDictionary *statusMessages;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    
+    FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    
+    
    /* FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     NSString *uid = [mySession friends][cell.friendLabel.text];
     //add game to your own file
