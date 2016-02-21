@@ -8,6 +8,9 @@
 
 #import "AppDelegate.h"
 #import <Firebase/Firebase.h>
+#import "MySession.h"
+
+#define mySession [MySession sharedManager]
 
 @interface AppDelegate ()
 
@@ -20,10 +23,11 @@
     // Override point for customization after application launch.
     
     Firebase *ref = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
-    [ref unauth];
+    //[ref unauth];
     if (ref.authData) {
         // user authenticated
         NSLog(@"%@", ref.authData);
+        
         self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
                                                                  bundle: nil];
@@ -34,6 +38,7 @@
         [navigation pushViewController:homeVC animated:NO];
         self.window.rootViewController = navigation;
         [self.window makeKeyAndVisible];
+        
     } else {
         // No user is signed in
     }

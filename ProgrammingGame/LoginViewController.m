@@ -7,17 +7,18 @@
 //
 
 #import "LoginViewController.h"
+#import "MySession.h"
+
+#define mySession [MySession sharedManager]
 
 @interface LoginViewController () <UITextFieldDelegate>
 
 @end
 
 @implementation LoginViewController
-Firebase *myRootRef;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    myRootRef = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
     
     self.confirmButton.clipsToBounds = YES;
     self.confirmButton.layer.cornerRadius = 5;
@@ -27,12 +28,30 @@ Firebase *myRootRef;
     self.passwordTextField.delegate = self;
     self.nicknameLabel.delegate = self;
     self.passwordTextField.secureTextEntry = YES;
+    
     // Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    self.usernameTextField.text = @"";
+    self.passwordTextField.text = @"";
+    self.nicknameLabel.text = @"";
+    
+    [self.loginButton setTitle:@"Login" forState:UIControlStateNormal];
+    self.errorMessageLabel.hidden = YES;
+    
+    self.nicknameLabel.alpha = 0;
+    self.usernameTextField.transform = CGAffineTransformMakeTranslation(0, 0);
+    self.passwordTextField.transform = CGAffineTransformMakeTranslation(0, 0);
+    self.loginButton.transform = CGAffineTransformMakeTranslation(0, 0);
+    self.confirmButton.transform = CGAffineTransformMakeTranslation(0, 0);
+    
+    [self resignKeyboards];
 }
 
 /*
@@ -45,10 +64,14 @@ Firebase *myRootRef;
 }
 */
 
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+-(void)resignKeyboards {
     [self.usernameTextField resignFirstResponder];
     [self.passwordTextField resignFirstResponder];
     [self.nicknameLabel resignFirstResponder];
+}
+
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [self resignKeyboards];
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField*)textField
@@ -98,6 +121,7 @@ Firebase *myRootRef;
                      }];
 }
 - (IBAction)pressedLogin:(id)sender {
+    [self resignKeyboards];
     self.errorMessageLabel.hidden = YES;
     if ([self.titleLabel.text isEqualToString:@"Sign Up"]) {
         self.titleLabel.text = @"Login";
@@ -124,22 +148,35 @@ Firebase *myRootRef;
 }
 
 - (void)loginUser:(NSString *)nickname {
-    [myRootRef authUser:self.usernameTextField.text password:self.passwordTextField.text
+    [[mySession myRootRef] authUser:self.usernameTextField.text password:self.passwordTextField.text
     withCompletionBlock:^(NSError *error, FAuthData *authData) {
         if (error) {
             // There was an error logging in to this account
+            NSLog(@"Error - %@", error);
+            
             self.errorMessageLabel.text = @"Login error";
             self.errorMessageLabel.hidden = NO;
             self.passwordTextField.text = @"";
             self.usernameTextField.text = @"";
         } else {
-            NSLog(@"Hello - %@", authData);
+            NSLog(@"Auth Data - %@", authData);
             if (nickname) {
                 NSDictionary *newUser = @{
                                           @"nickname":nickname
                                           };
-                [[[myRootRef childByAppendingPath:@"users"]
+                [[[[mySession myRootRef] childByAppendingPath:@"users"]
                   childByAppendingPath:authData.uid] setValue:newUser];
+                [mySession setNickname:nickname];
+            } else {
+                NSString *nickname = [mySession nickname];
+                if ([nickname isEqualToString:@""]) {
+                    Firebase *ref = [[Firebase alloc] initWithUrl: [NSString stringWithFormat:@"https://programminggame.firebaseio.com/users/%@", [mySession myRootRef].authData.uid]];
+                    [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                        [mySession setNickname:snapshot.value[@"nickname"]];
+                        [[NSNotificationCenter defaultCenter] postNotificationName: @"nicknameChanged" object:nil];
+                    }];
+                }
+
             }
            
             
@@ -155,7 +192,7 @@ Firebase *myRootRef;
 }
 
 - (void)signUpUser {
-    [myRootRef createUser:self.usernameTextField.text password:self.passwordTextField.text
+    [[mySession myRootRef] createUser:self.usernameTextField.text password:self.passwordTextField.text
  withValueCompletionBlock:^(NSError *error, NSDictionary *result) {
      if (error) {
          // There was an error creating the account
@@ -177,8 +214,9 @@ Firebase *myRootRef;
 }
 
 - (IBAction)didConfirm:(id)sender {
+    [self resignKeyboards];
     [self.confirmButton setEnabled:NO];
-    bool shouldStop = YES;
+    bool shouldStop = NO;
     
     if ([self.titleLabel.text isEqual:@"Sign Up"]) {
         shouldStop= [self.nicknameLabel.text isEqualToString:@""];

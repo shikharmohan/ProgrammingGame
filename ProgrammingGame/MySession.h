@@ -7,7 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <Firebase/Firebase.h>
 
-@interface MySession : NSObject
+@interface MySession : NSObject {
+    NSString *nickname;
+    NSMutableArray *friends;
+    Firebase *myRootRef;
+}
+
+@property (strong, nonatomic) NSString* nickname;
+@property (strong, nonatomic) NSMutableArray *friends;
+@property (strong) Firebase *myRootRef;
++ (id)sharedManager;
 
 @end

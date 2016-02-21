@@ -7,12 +7,16 @@
 //
 
 #import "ViewController.h"
+#import "MySession.h"
+
+#define mySession [MySession sharedManager]
 
 @interface ViewController ()
 
 @end
 
 @implementation ViewController
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -22,6 +26,7 @@
                                              selector:@selector(receiveNotification:)
                                                  name:@"KeyboardEntry"
                                                object:nil];
+    
     //self.youEmoji.hidden = YES;
     //self.youLabel.hidden = YES;
     

@@ -182,10 +182,10 @@
             </objects>
             <point key="canvasLocation" x="-503.5" y="-354.5"/>
         </scene>
-        <!--View Controller-->
+        <!--Home View Controller-->
         <scene sceneID="nK1-de-I2C">
             <objects>
-                <viewController storyboardIdentifier="homeVC" id="vlz-OL-dLf" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="homeVC" id="vlz-OL-dLf" customClass="HomeViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="Swu-J7-g4F"/>
                         <viewControllerLayoutGuide type="bottom" id="8v2-5H-rsI"/>
@@ -223,6 +223,9 @@
                                 <state key="normal" title="Add Friend">
                                     <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
+                                <connections>
+                                    <action selector="addFriendPressed:" destination="vlz-OL-dLf" eventType="touchUpInside" id="0Py-hT-YxR"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JSY-rI-uIX">
                                 <rect key="frame" x="17" y="30" width="52" height="30"/>
@@ -230,9 +233,12 @@
                                 <state key="normal" title="Log out">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
+                                <connections>
+                                    <action selector="logoutPressed:" destination="vlz-OL-dLf" eventType="touchUpInside" id="XiD-1j-eon"/>
+                                </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Shana" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TZi-jJ-vje">
-                                <rect key="frame" x="0.0" y="59" width="375" height="45"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="shana" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TZi-jJ-vje">
+                                <rect key="frame" x="0.0" y="59" width="375" height="49"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-UltraLight" family="Helvetica Neue" pointSize="42"/>
                                 <color key="textColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
@@ -245,6 +251,10 @@
                     </view>
                     <navigationItem key="navigationItem" id="5QO-hb-dJ1"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
+                    <connections>
+                        <outlet property="nicknameLabel" destination="TZi-jJ-vje" id="424-ae-GT5"/>
+                        <outlet property="tableView" destination="izS-Ry-e6H" id="Rf3-qt-M7l"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="z8A-lQ-ihA" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
