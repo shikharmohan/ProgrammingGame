@@ -7,7 +7,6 @@
 //
 
 #import "LoginViewController.h"
-#import <Firebase/Firebase.h>
 
 @interface LoginViewController () <UITextFieldDelegate>
 
@@ -67,14 +66,24 @@ Firebase *myRootRef;
     if ([self.titleLabel.text isEqualToString:@"Sign Up"]) {
         self.titleLabel.text = @"Login";
         [self.loginButton setEnabled:NO];
-        [self.loginButton setTitle:@"Cancel" forState:UIControlStateNormal];
+        [self.loginButton setTitle:@"Log In" forState:UIControlStateNormal];
     } else {
         self.titleLabel.text = @"Sign Up";
         [self.loginButton setEnabled:NO];
-        [self.loginButton setTitle:@"Log in" forState:UIControlStateNormal];
+        [self.loginButton setTitle:@"Cancel" forState:UIControlStateNormal];
     }
     [self.loginButton setEnabled:YES];
     
+}
+
+-(void)navigateToMainVC {
+    NSLog(@"in navigate");
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
+                                                             bundle: nil];
+ 
+    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+    
+    [self.navigationController pushViewController:controller animated:YES];
 }
 
 - (IBAction)didConfirm:(id)sender {
@@ -90,13 +99,17 @@ Firebase *myRootRef;
               // There was an error logging in to this account
               self.errorMessageLabel.text = @"Login error";
               self.errorMessageLabel.hidden = NO;
+              self.passwordTextField.text = @"";
+              self.usernameTextField.text = @"";
           } else {
+              self.errorMessageLabel.text = @"Login Successful";
+              self.errorMessageLabel.hidden = NO;
+              [self navigateToMainVC];
               // We are now logged in
+              
           }
         }];
         [self.confirmButton setEnabled:YES];
-        self.passwordTextField.text = @"";
-        self.usernameTextField.text = @"";
     } else {
         [myRootRef createUser:self.usernameTextField.text password:self.passwordTextField.text
      withValueCompletionBlock:^(NSError *error, NSDictionary *result) {
@@ -105,15 +118,19 @@ Firebase *myRootRef;
                  NSLog(@"Error - %@", error);
                  self.errorMessageLabel.text = @"Sign up error";
                  self.errorMessageLabel.hidden = NO;
+                 self.passwordTextField.text = @"";
+                 self.usernameTextField.text = @"";
              } else {
                  self.errorMessageLabel.hidden = YES;
                  NSString *uid = [result objectForKey:@"uid"];
                  NSLog(@"Successfully created user account with uid: %@", uid);
+                 self.errorMessageLabel.text = @"Sign up Successful";
+                 self.errorMessageLabel.hidden = NO;
+                 [self navigateToMainVC];
              }
         }];
         [self.confirmButton setEnabled:YES];
-        self.passwordTextField.text = @"";
-        self.usernameTextField.text = @"";
+        
     }
     
 }

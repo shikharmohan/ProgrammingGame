@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import <Firebase/Firebase.h>
 
 @interface AppDelegate ()
 
@@ -17,6 +18,25 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    Firebase *ref = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
+    if (ref.authData) {
+        // user authenticated
+        NSLog(@"%@", ref.authData);
+        self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
+                                                                 bundle: nil];
+        
+        UINavigationController *navigation = (UINavigationController*)[mainStoryboard
+                                                                       instantiateViewControllerWithIdentifier: @"mainNav"];
+        UIViewController* homeVC = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+        [navigation pushViewController:homeVC animated:NO];
+        self.window.rootViewController = navigation;
+        [self.window makeKeyAndVisible];
+    } else {
+        // No user is signed in
+    }
+    
     return YES;
 }
 
