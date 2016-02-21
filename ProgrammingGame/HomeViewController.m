@@ -8,6 +8,7 @@
 
 #import "HomeViewController.h"
 #import "MySession.h"
+#import "FriendsTableViewCell.h"
 
 #define mySession [MySession sharedManager]
 
@@ -17,11 +18,16 @@
 
 @implementation HomeViewController
 bool isContainerOpen;
+int numFriends;
 
 - (void)viewDidLoad {
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(receiveNotification:)
                                                  name:@"nicknameChanged"
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(receiveNotification:)
+                                                 name:@"friendsChanged"
                                                object:nil];
     self.nicknameLabel.text = [mySession nickname];
     self.addFriendView.translatesAutoresizingMaskIntoConstraints = YES;
@@ -29,6 +35,8 @@ bool isContainerOpen;
     self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
                              self.addFriendView.frame.origin.y,
                              self.addFriendView.frame.size.width,0);
+    self.tableView.dataSource = self;
+    self.tableView.delegate = self;
     [super viewDidLoad];
 }
 
@@ -37,11 +45,25 @@ bool isContainerOpen;
     // Dispose of any resources that can be recreated.
 }
 
+-(void)getFriendsArray {
+    //update friend array
+    Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@", [mySession myRootRef].authData.uid]];
+    [usersRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        [mySession setFriends:snapshot.value[@"friends"]];
+        [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
+    }];
+
+}
+
 - (void) receiveNotification:(NSNotification *) notification
 {
     if ([[notification name] isEqualToString:@"nicknameChanged"]) {
         NSLog(@"Recieved nickname changed notif");
         self.nicknameLabel.text = [mySession nickname];
+        [self getFriendsArray];
+        
+    } else if ([[notification name] isEqualToString:@"friendsChanged"]) {
+        [self.tableView reloadData];
     }
 }
 
@@ -118,7 +140,7 @@ bool isContainerOpen;
 }
 
 -(void)clearMemory {
-    [mySession setFriends:nil];
+    [mySession setFriends:[[NSMutableDictionary alloc] init]];
     [mySession setNickname:@""];
     self.nicknameLabel.text = @"";
 }
@@ -135,4 +157,28 @@ bool isContainerOpen;
         [self openContainer];
     }
 }
+
+
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+#warning Incomplete implementation, return the number of sections
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+#warning Incomplete implementation, return the number of rows
+    return [[mySession friends] count];
+}
+
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    FriendsTableViewCell *customCell = [self.tableView dequeueReusableCellWithIdentifier:@"myCell" forIndexPath:indexPath];
+    
+    NSArray *keys = [[mySession friends] allKeys];
+    NSString *aKey = [keys objectAtIndex:[indexPath row]];
+    customCell.friendLabel.text = aKey;
+    return customCell;
+}
+
 @end

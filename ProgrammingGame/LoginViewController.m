@@ -158,7 +158,7 @@
             // There was an error logging in to this account
             NSLog(@"Error - %@", error);
             
-            self.errorMessageLabel.text = @"Login error";
+            self.errorMessageLabel.text = @"Invalid email/password";
             self.errorMessageLabel.hidden = NO;
             self.passwordTextField.text = @"";
             self.usernameTextField.text = @"";

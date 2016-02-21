@@ -21,6 +21,7 @@
 		ED8F29841C796B3400F2F662 /* MySession.m in Sources */ = {isa = PBXBuildFile; fileRef = ED8F29831C796B3400F2F662 /* MySession.m */; };
 		ED8F298B1C7998F100F2F662 /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ED8F298A1C7998F100F2F662 /* HomeViewController.m */; };
 		ED8F298E1C79C0C500F2F662 /* AddFriendViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ED8F298D1C79C0C500F2F662 /* AddFriendViewController.m */; };
+		ED8F29911C79E2F700F2F662 /* FriendsTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = ED8F29901C79E2F700F2F662 /* FriendsTableViewCell.m */; };
 		EDD99FFB1C78C01600D5E70C /* me.png in Resources */ = {isa = PBXBuildFile; fileRef = EDD99FFA1C78C01600D5E70C /* me.png */; };
 		FEF25C0DC1A2C3915DAD021C /* libPods-ProgrammingGame.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 602D551A99C35A7A3BA024D3 /* libPods-ProgrammingGame.a */; };
 /* End PBXBuildFile section */
@@ -71,6 +72,8 @@
 		ED8F298A1C7998F100F2F662 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
 		ED8F298C1C79C0C500F2F662 /* AddFriendViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddFriendViewController.h; sourceTree = "<group>"; };
 		ED8F298D1C79C0C500F2F662 /* AddFriendViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddFriendViewController.m; sourceTree = "<group>"; };
+		ED8F298F1C79E2F700F2F662 /* FriendsTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FriendsTableViewCell.h; sourceTree = "<group>"; };
+		ED8F29901C79E2F700F2F662 /* FriendsTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FriendsTableViewCell.m; sourceTree = "<group>"; };
 		EDD99FFA1C78C01600D5E70C /* me.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = me.png; sourceTree = "<group>"; };
 		F14726CD38D6BA7C0049AB50 /* Pods-ProgrammingGame.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ProgrammingGame.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ProgrammingGame/Pods-ProgrammingGame.debug.xcconfig"; sourceTree = "<group>"; };
 		FCBD397A932D3FBC3E74E48B /* Pods-ProgrammingGame.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ProgrammingGame.release.xcconfig"; path = "Pods/Target Support Files/Pods-ProgrammingGame/Pods-ProgrammingGame.release.xcconfig"; sourceTree = "<group>"; };
@@ -195,6 +198,8 @@
 				ED8F298A1C7998F100F2F662 /* HomeViewController.m */,
 				ED8F298C1C79C0C500F2F662 /* AddFriendViewController.h */,
 				ED8F298D1C79C0C500F2F662 /* AddFriendViewController.m */,
+				ED8F298F1C79E2F700F2F662 /* FriendsTableViewCell.h */,
+				ED8F29901C79E2F700F2F662 /* FriendsTableViewCell.m */,
 			);
 			name = ViewControllers;
 			sourceTree = "<group>";
@@ -402,6 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED8F29911C79E2F700F2F662 /* FriendsTableViewCell.m in Sources */,
 				ED8F29841C796B3400F2F662 /* MySession.m in Sources */,
 				ED0170A81C78886800AB7529 /* LoginViewController.m in Sources */,
 				ED0170791C786DFD00AB7529 /* ViewController.m in Sources */,

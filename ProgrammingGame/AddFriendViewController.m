@@ -53,37 +53,43 @@
 }
 
 - (IBAction)addFriend:(id)sender {
-    NSLog(@"hello");
     if ([self.usernameTextField.text isEqualToString:@""]) {
         self.usernameTextField.text = @"";
         self.errorMessage.text = @"No name entered!";
         self.errorMessage.hidden = NO;
-        self.errorEmoji.hidden = NO;
+    } else {
+        //check if user exists
+        Firebase *ref = [[Firebase alloc] initWithUrl: @"https://programminggame.firebaseio.com/usersRef"];
+        [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+            if (!snapshot.value[self.usernameTextField.text]) { //aka the name is not found
+                self.usernameTextField.text = @"";
+                self.errorMessage.text = @"'s username not found";
+                self.errorMessage.hidden = NO;
+            } else {
+                //add user to friend list of current user
+                Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData.uid]];
+                NSDictionary *updatedDict = @{
+                                              self.usernameTextField.text :snapshot.value[self.usernameTextField.text]
+                                              };
+                [usersRef updateChildValues: updatedDict];
+                
+                //update friend array
+                usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@", [mySession myRootRef].authData.uid]];
+                [usersRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                    [mySession setFriends:snapshot.value[@"friends"]];
+                    NSLog(@"friends array updated: %@", [mySession friends]);
+                    [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
+                }];
+                self.usernameTextField.text = @"";
+                self.errorMessage.text = @" added!";
+                
+            }
+        }];
     }
-    //check if user exists
-    Firebase *ref = [[Firebase alloc] initWithUrl: @"https://programminggame.firebaseio.com/usersRef"];
-    [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-        if (!snapshot.value[self.usernameTextField.text]) { //aka the name is not found
-            self.usernameTextField.text = @"";
-            self.errorMessage.hidden = NO;
-            self.errorEmoji.hidden = NO;
-        } else {
-            //add user to friend list of current user
-            Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData.uid]];
-            NSDictionary *updatedDict = @{
-                                          self.usernameTextField.text :snapshot.value[self.usernameTextField.text]
-                                          };
-            [usersRef updateChildValues: updatedDict];
-            
-            //update friend array
-            usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@", [mySession myRootRef].authData.uid]];
-            [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                [mySession setFriends:snapshot.value[@"friends"]];
-                NSLog(@"friends array updated: %@", [mySession friends]);
-            }];
-
-        }
-    }];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.errorMessage.hidden = YES;
+    });
+    
 
 }
 @end
