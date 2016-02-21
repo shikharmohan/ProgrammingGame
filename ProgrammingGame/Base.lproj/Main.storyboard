@@ -64,6 +64,13 @@
                                     <action selector="pressedLogin:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EGX-xU-QLq"/>
                                 </connections>
                             </button>
+                            <textField opaque="NO" clipsSubviews="YES" alpha="0.0" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="NICKNAME" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="3rc-gj-EfW">
+                                <rect key="frame" x="41" y="157" width="293" height="30"/>
+                                <color key="tintColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" red="0.12156862745098039" green="0.12156862745098039" blue="0.12156862745098039" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
@@ -73,6 +80,7 @@
                         <outlet property="confirmButton" destination="LFL-gK-imc" id="rUm-fg-zsl"/>
                         <outlet property="errorMessageLabel" destination="a2C-mK-FJD" id="l56-d2-uwl"/>
                         <outlet property="loginButton" destination="zHY-MN-AFz" id="ICz-cr-ayf"/>
+                        <outlet property="nicknameLabel" destination="3rc-gj-EfW" id="9nx-cb-rnH"/>
                         <outlet property="passwordTextField" destination="WYw-v2-EaS" id="1b8-C8-zLI"/>
                         <outlet property="titleLabel" destination="fWe-b3-gw8" id="O7Y-L6-lG3"/>
                         <outlet property="usernameTextField" destination="c9V-Y3-35f" id="fXh-Vm-ttN"/>
@@ -155,7 +163,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SBK-z0-JGU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="909.5" y="422.5"/>
+            <point key="canvasLocation" x="877.5" y="422.5"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="amM-sv-cEF">
@@ -855,7 +863,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HCS-9f-BGO" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1401.5" y="553.5"/>
+            <point key="canvasLocation" x="1397.5" y="585.5"/>
         </scene>
     </scenes>
     <resources>

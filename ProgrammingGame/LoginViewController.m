@@ -25,6 +25,7 @@ Firebase *myRootRef;
     //text fields
     self.usernameTextField.delegate = self;
     self.passwordTextField.delegate = self;
+    self.nicknameLabel.delegate = self;
     self.passwordTextField.secureTextEntry = YES;
     // Do any additional setup after loading the view.
 }
@@ -47,28 +48,65 @@ Firebase *myRootRef;
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [self.usernameTextField resignFirstResponder];
     [self.passwordTextField resignFirstResponder];
-    
+    [self.nicknameLabel resignFirstResponder];
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField*)textField
 {
-    
-    if ([textField isEqual:self.usernameTextField]) {
+    if ([textField isEqual:self.nicknameLabel]) {
+        [self.usernameTextField becomeFirstResponder];
+    } else if ([textField isEqual:self.usernameTextField]) {
         [self.passwordTextField becomeFirstResponder];
     } else {
         [textField resignFirstResponder];
     }
     return NO; // We do not want UITextField to insert line-breaks.
 }
+-(void)signUpTransitionDown {
+    [UIView animateWithDuration:0.5
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^{
+                         self.nicknameLabel.transform = CGAffineTransformMakeTranslation(0, 70);
+                         self.nicknameLabel.alpha = 1;
+                         
+                         self.usernameTextField.transform = CGAffineTransformMakeTranslation(0, 70);
+                         self.passwordTextField.transform = CGAffineTransformMakeTranslation(0, 70);
+                         self.loginButton.transform = CGAffineTransformMakeTranslation(0, 70);
+                         self.confirmButton.transform = CGAffineTransformMakeTranslation(0, 70);
+                     }
+                     completion:^(BOOL finished) {
+                         
+                     }];
+}
 
+-(void)signUpTransitionUp {
+    [UIView animateWithDuration:0.5
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         self.nicknameLabel.transform = CGAffineTransformMakeTranslation(0, 0);
+                         self.nicknameLabel.alpha = 0;
+                         
+                         self.usernameTextField.transform = CGAffineTransformMakeTranslation(0, 0);
+                         self.passwordTextField.transform = CGAffineTransformMakeTranslation(0, 0);
+                         self.loginButton.transform = CGAffineTransformMakeTranslation(0, 0);
+                         self.confirmButton.transform = CGAffineTransformMakeTranslation(0, 0);
+                     }
+                     completion:^(BOOL finished) {
+                         
+                     }];
+}
 - (IBAction)pressedLogin:(id)sender {
     self.errorMessageLabel.hidden = YES;
     if ([self.titleLabel.text isEqualToString:@"Sign Up"]) {
         self.titleLabel.text = @"Login";
+        [self signUpTransitionUp];
         [self.loginButton setEnabled:NO];
         [self.loginButton setTitle:@"Log In" forState:UIControlStateNormal];
     } else {
         self.titleLabel.text = @"Sign Up";
+        [self signUpTransitionDown];
         [self.loginButton setEnabled:NO];
         [self.loginButton setTitle:@"Cancel" forState:UIControlStateNormal];
     }
@@ -85,7 +123,7 @@ Firebase *myRootRef;
     [self.navigationController pushViewController:controller animated:YES];
 }
 
-- (void)loginUser {
+- (void)loginUser:(NSString *)nickname {
     [myRootRef authUser:self.usernameTextField.text password:self.passwordTextField.text
     withCompletionBlock:^(NSError *error, FAuthData *authData) {
         if (error) {
@@ -95,14 +133,15 @@ Firebase *myRootRef;
             self.passwordTextField.text = @"";
             self.usernameTextField.text = @"";
         } else {
-            
             NSLog(@"Hello - %@", authData);
-            
-            NSDictionary *newUser = @{
-                                      @"nickname":@"Shana"
-                                      };
-            [[[myRootRef childByAppendingPath:@"users"]
-              childByAppendingPath:authData.uid] setValue:newUser];
+            if (nickname) {
+                NSDictionary *newUser = @{
+                                          @"nickname":nickname
+                                          };
+                [[[myRootRef childByAppendingPath:@"users"]
+                  childByAppendingPath:authData.uid] setValue:newUser];
+            }
+           
             
             self.errorMessageLabel.text = @"Login Successful";
             self.errorMessageLabel.hidden = NO;
@@ -131,7 +170,7 @@ Firebase *myRootRef;
          NSLog(@"Successfully created user account with uid: %@", uid);
          self.errorMessageLabel.text = @"Sign up Successful";
          self.errorMessageLabel.hidden = NO;
-         [self loginUser];
+         [self loginUser:self.nicknameLabel.text];
      }
  }];
     [self.confirmButton setEnabled:YES];
@@ -139,13 +178,18 @@ Firebase *myRootRef;
 
 - (IBAction)didConfirm:(id)sender {
     [self.confirmButton setEnabled:NO];
+    bool shouldStop = YES;
     
-    if ([self.passwordTextField.text isEqualToString:@""] || [self.usernameTextField.text isEqualToString:@""]) {
-        self.errorMessageLabel.text = @"Please enter a username/password";
+    if ([self.titleLabel.text isEqual:@"Sign Up"]) {
+        shouldStop= [self.nicknameLabel.text isEqualToString:@""];
+    }
+    
+    if ([self.passwordTextField.text isEqualToString:@""] || [self.usernameTextField.text isEqualToString:@""]|| shouldStop) {
+        self.errorMessageLabel.text = @"Please fill out all fields";
         self.errorMessageLabel.hidden = NO;
         [self.confirmButton setEnabled:YES];
     } else if ([self.titleLabel.text isEqual:@"Login"]) {
-        [self loginUser];
+        [self loginUser:nil];
     } else {
         [self signUpUser];
     }

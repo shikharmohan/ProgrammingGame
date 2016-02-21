@@ -17,6 +17,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *errorMessageLabel;
 @property (weak, nonatomic) IBOutlet UIButton *loginButton;
 
+@property (weak, nonatomic) IBOutlet UITextField *nicknameLabel;
 
 - (IBAction)pressedLogin:(id)sender;
 

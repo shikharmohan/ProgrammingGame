@@ -20,6 +20,7 @@
     // Override point for customization after application launch.
     
     Firebase *ref = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
+    [ref unauth];
     if (ref.authData) {
         // user authenticated
         NSLog(@"%@", ref.authData);
