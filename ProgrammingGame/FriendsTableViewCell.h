@@ -10,5 +10,6 @@
 
 @interface FriendsTableViewCell : UITableViewCell
 @property (weak, nonatomic) IBOutlet UILabel *friendLabel;
+@property (weak, nonatomic) IBOutlet UILabel *statusMessage;
 
 @end

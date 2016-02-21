@@ -19,5 +19,6 @@
 - (IBAction)addCancellPressed:(id)sender;
 @property (weak, nonatomic) IBOutlet UIButton *logoutButton;
 
+
 @property (weak, nonatomic) IBOutlet UILabel *opaqueMask;
 @end

@@ -19,6 +19,7 @@
 @implementation HomeViewController
 bool isContainerOpen;
 int numFriends;
+NSDictionary *statusMessages;
 
 - (void)viewDidLoad {
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -41,6 +42,24 @@ int numFriends;
                              self.addFriendView.frame.size.width,0);
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
+    
+    //status messages
+    statusMessages = @{
+        @"0": @"friend request sent",
+        @"1" : @"accept friend request",
+        @"2" : @"",
+        @"3": @"game request sent",
+        @"4": @"accept game request"
+        };
+    
+    //retrieve friends:
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData]];
+    // Attach a block to read the data at our posts reference
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        NSLog(@"%@", snapshot.value);
+    } withCancelBlock:^(NSError *error) {
+        NSLog(@"%@", error.description);
+    }];
     [super viewDidLoad];
 }
 
@@ -53,6 +72,7 @@ int numFriends;
     //update friend array
     Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@", [mySession myRootRef].authData.uid]];
     [usersRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        NSLog(@"Shana snapshot - %@", snapshot);
         [mySession setFriends:snapshot.value[@"friends"]];
         [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
     }];
@@ -67,6 +87,7 @@ int numFriends;
         [self getFriendsArray];
         
     } else if ([[notification name] isEqualToString:@"friendsChanged"]) {
+        [[mySession friends] removeObjectForKey:[mySession nickname]];
         [self.tableView reloadData];
     } else if ([[notification name] isEqualToString:@"friendAdded"]) {
         [self closeContainer];
@@ -187,6 +208,7 @@ int numFriends;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 #warning Incomplete implementation, return the number of rows
+    NSLog(@"Shana - count %lu", (unsigned long)[[mySession friends] count]);
     return [[mySession friends] count];
 }
 
@@ -197,13 +219,43 @@ int numFriends;
     NSArray *keys = [[mySession friends] allKeys];
     NSString *aKey = [keys objectAtIndex:[indexPath row]];
     customCell.friendLabel.text = aKey;
+    NSString *msg = statusMessages[[mySession friends][aKey][@"status"]];
+    customCell.statusMessage.text = msg;
     return customCell;
 }
 
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath
-                    animated:(BOOL)animated
-              scrollPosition:(UITableViewScrollPosition)scrollPosition {
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+   /* FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    NSString *uid = [mySession friends][cell.friendLabel.text];
+    //add game to your own file
+    Firebase *ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid]  childByAppendingPath:@"games"];
+    //0 is he asked you, 1 you asked him, 2 you are both ready
+    NSDictionary *status = @{
+                             @"status": @"0",
+                             @"nickname" : cell.friendLabel.text
+                             };
+    NSDictionary *games = @{
+                            uid: status
+                            };
+    NSLog(@"game values updated %@", games);
+    [ref updateChildValues:games];
     
+    //add game to friend's file
+    ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:uid]  childByAppendingPath:@"games"];
+    
+    //-1 is no game, 0 is he asked you, 1 you asked him, 2 you are both ready
+    status = @{
+                 @"status": @"0",
+                 @"nickname" : [mySession nickname]
+                 };
+    games = @{
+                            [mySession myRootRef].authData.uid: status
+                            };
+    NSLog(@"game values updated for friend %@", games);
+    [ref updateChildValues:games];
+    cell.statusMessage.text = @"game request sent";*/
 }
 
 @end

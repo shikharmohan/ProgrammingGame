@@ -29,6 +29,8 @@
     self.nicknameLabel.delegate = self;
     self.passwordTextField.secureTextEntry = YES;
     // Do any additional setup after loading the view.
+    
+   
 }
 
 - (void)didReceiveMemoryWarning {
@@ -166,17 +168,19 @@
             NSLog(@"Nickname %@ - Auth Data - %@", nickname, authData);
             if (nickname) {
                 Firebase *usersRef = [[mySession myRootRef] childByAppendingPath: @"usersRef"];
-                NSDictionary *friendsDict = [[NSDictionary alloc] init];
+                NSDictionary *tempFriends = @{
+                                              nickname:@"temp"
+                                              };
                 NSDictionary *updatedDict = @{
                                            nickname: authData.uid,
-                                           @"friends": friendsDict
                                            };
                 [usersRef updateChildValues: updatedDict];
                 
-                
                 NSDictionary *newUser = @{
-                                          @"nickname":nickname
+                                          @"nickname":nickname,
+                                          @"friends": tempFriends
                                           };
+                NSLog(@"Shana dict %@", newUser);
                 [[[[mySession myRootRef] childByAppendingPath:@"users"]
                   childByAppendingPath:authData.uid] setValue:newUser];
                 [mySession setNickname:nickname];

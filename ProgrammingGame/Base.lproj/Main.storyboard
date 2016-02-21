@@ -206,9 +206,15 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Friend Name" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2F8-J9-MRr">
-                                                    <rect key="frame" x="30" y="22" width="317" height="47"/>
+                                                    <rect key="frame" x="74" y="22" width="273" height="47"/>
                                                     <fontDescription key="fontDescription" name="HelveticaNeue-UltraLight" family="Helvetica Neue" pointSize="40"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ucX-QA-ABV">
+                                                    <rect key="frame" x="16" y="64" width="273" height="24"/>
+                                                    <fontDescription key="fontDescription" name="HelveticaNeue-UltraLight" family="Helvetica Neue" pointSize="19"/>
+                                                    <color key="textColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
@@ -217,6 +223,7 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <outlet property="friendLabel" destination="2F8-J9-MRr" id="jTs-mM-eFc"/>
+                                            <outlet property="statusMessage" destination="ucX-QA-ABV" id="HDg-WN-p5H"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
