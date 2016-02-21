@@ -14,5 +14,8 @@
 - (IBAction)logoutPressed:(id)sender;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIButton *addFriend;
+@property (weak, nonatomic) IBOutlet UIButton *addFriendLogo;
+@property (weak, nonatomic) IBOutlet UIView *addFriendView;
+- (IBAction)addCancellPressed:(id)sender;
 
 @end

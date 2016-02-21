@@ -235,37 +235,43 @@
                                 <color key="textColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <containerView autoresizesSubviews="NO" opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3dq-LA-wUO">
+                                <rect key="frame" x="0.0" y="262" width="300" height="0.0"/>
+                                <connections>
+                                    <segue destination="mGQ-yK-9YV" kind="embed" id="jea-09-bAK"/>
+                                </connections>
+                            </containerView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fgS-V6-l2y">
-                                <rect key="frame" x="-3" y="227" width="300" height="45"/>
+                                <rect key="frame" x="0.0" y="227" width="254" height="45"/>
                                 <color key="backgroundColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="18"/>
-                                <state key="normal" title="Add Friend">
+                                <state key="normal" title="        Add Friend">
                                     <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                                 <connections>
                                     <action selector="addFriendPressed:" destination="vlz-OL-dLf" eventType="touchUpInside" id="0Py-hT-YxR"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="G2O-l6-x8B">
-                                <rect key="frame" x="254" y="225" width="43" height="45"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZqE-IS-GyD">
+                                <rect key="frame" x="253" y="227" width="47" height="45"/>
+                                <color key="backgroundColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-UltraLight" family="Helvetica Neue" pointSize="39"/>
                                 <state key="normal" title="+">
                                     <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
-                            </button>
-                            <containerView hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3dq-LA-wUO">
-                                <rect key="frame" x="-1" y="272" width="298" height="145"/>
                                 <connections>
-                                    <segue destination="mGQ-yK-9YV" kind="embed" id="jea-09-bAK"/>
+                                    <action selector="addCancellPressed:" destination="vlz-OL-dLf" eventType="touchUpInside" id="frV-Ld-Yf7"/>
                                 </connections>
-                            </containerView>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                     </view>
                     <navigationItem key="navigationItem" id="5QO-hb-dJ1"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina47"/>
                     <connections>
-                        <outlet property="addFriend" destination="G2O-l6-x8B" id="dCa-0n-XUx"/>
+                        <outlet property="addFriend" destination="fgS-V6-l2y" id="uHz-Wa-w8d"/>
+                        <outlet property="addFriendLogo" destination="ZqE-IS-GyD" id="1yI-ZL-Qmk"/>
+                        <outlet property="addFriendView" destination="3dq-LA-wUO" id="OKb-wT-xDs"/>
                         <outlet property="nicknameLabel" destination="TZi-jJ-vje" id="424-ae-GT5"/>
                         <outlet property="tableView" destination="izS-Ry-e6H" id="Rf3-qt-M7l"/>
                     </connections>
@@ -889,32 +895,44 @@
             </objects>
             <point key="canvasLocation" x="1397.5" y="585.5"/>
         </scene>
-        <!--View Controller-->
+        <!--Add Friend View Controller-->
         <scene sceneID="FQx-4C-XDU">
             <objects>
-                <viewController id="mGQ-yK-9YV" sceneMemberID="viewController">
+                <viewController id="mGQ-yK-9YV" customClass="AddFriendViewController" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="eam-Dj-s80">
-                        <rect key="frame" x="0.0" y="0.0" width="298" height="145"/>
+                        <rect key="frame" x="0.0" y="0.0" width="300" height="0.0"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VR5-xo-KsJ">
+                                <rect key="frame" x="0.0" y="0.0" width="300" height="145"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="USERNAME" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="X9O-0l-JlW">
                                 <rect key="frame" x="20" y="46" width="258" height="30"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="tintColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="textColor" red="0.33722421180000001" green="1" blue="0.77842594070000004" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Light" family="Helvetica Neue" pointSize="18"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHd-ld-hU9">
                                 <rect key="frame" x="248" y="92" width="30" height="30"/>
                                 <state key="normal" title="Add">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="titleColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="1" colorSpace="calibratedRGB"/>
                                 </state>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" red="0.122198548" green="0.122198548" blue="0.122198548" alpha="0.9160948057432432" colorSpace="calibratedRGB"/>
                     </view>
+                    <connections>
+                        <outlet property="bckLabel" destination="VR5-xo-KsJ" id="sRe-xO-QCT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UHI-pu-kP6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="232" y="1049"/>
+            <point key="canvasLocation" x="232" y="1048.5"/>
         </scene>
     </scenes>
     <resources>
