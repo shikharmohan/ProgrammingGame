@@ -77,60 +77,77 @@ Firebase *myRootRef;
 }
 
 -(void)navigateToMainVC {
-    NSLog(@"in navigate");
     UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
                                                              bundle: nil];
  
-    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"homeVC"];
     
     [self.navigationController pushViewController:controller animated:YES];
 }
 
+- (void)loginUser {
+    [myRootRef authUser:self.usernameTextField.text password:self.passwordTextField.text
+    withCompletionBlock:^(NSError *error, FAuthData *authData) {
+        if (error) {
+            // There was an error logging in to this account
+            self.errorMessageLabel.text = @"Login error";
+            self.errorMessageLabel.hidden = NO;
+            self.passwordTextField.text = @"";
+            self.usernameTextField.text = @"";
+        } else {
+            
+            NSLog(@"Hello - %@", authData);
+            
+            NSDictionary *newUser = @{
+                                      @"nickname":@"Shana"
+                                      };
+            [[[myRootRef childByAppendingPath:@"users"]
+              childByAppendingPath:authData.uid] setValue:newUser];
+            
+            self.errorMessageLabel.text = @"Login Successful";
+            self.errorMessageLabel.hidden = NO;
+            [self navigateToMainVC];
+            // We are now logged in
+            
+        }
+    }];
+    [self.confirmButton setEnabled:YES];
+
+}
+
+- (void)signUpUser {
+    [myRootRef createUser:self.usernameTextField.text password:self.passwordTextField.text
+ withValueCompletionBlock:^(NSError *error, NSDictionary *result) {
+     if (error) {
+         // There was an error creating the account
+         NSLog(@"Error - %@", error);
+         self.errorMessageLabel.text = @"Sign up error";
+         self.errorMessageLabel.hidden = NO;
+         self.passwordTextField.text = @"";
+         self.usernameTextField.text = @"";
+     } else {
+         self.errorMessageLabel.hidden = YES;
+         NSString *uid = [result objectForKey:@"uid"];
+         NSLog(@"Successfully created user account with uid: %@", uid);
+         self.errorMessageLabel.text = @"Sign up Successful";
+         self.errorMessageLabel.hidden = NO;
+         [self loginUser];
+     }
+ }];
+    [self.confirmButton setEnabled:YES];
+}
+
 - (IBAction)didConfirm:(id)sender {
     [self.confirmButton setEnabled:NO];
+    
     if ([self.passwordTextField.text isEqualToString:@""] || [self.usernameTextField.text isEqualToString:@""]) {
         self.errorMessageLabel.text = @"Please enter a username/password";
         self.errorMessageLabel.hidden = NO;
         [self.confirmButton setEnabled:YES];
     } else if ([self.titleLabel.text isEqual:@"Login"]) {
-        [myRootRef authUser:self.usernameTextField.text password:self.passwordTextField.text
-  withCompletionBlock:^(NSError *error, FAuthData *authData) {
-          if (error) {
-              // There was an error logging in to this account
-              self.errorMessageLabel.text = @"Login error";
-              self.errorMessageLabel.hidden = NO;
-              self.passwordTextField.text = @"";
-              self.usernameTextField.text = @"";
-          } else {
-              self.errorMessageLabel.text = @"Login Successful";
-              self.errorMessageLabel.hidden = NO;
-              [self navigateToMainVC];
-              // We are now logged in
-              
-          }
-        }];
-        [self.confirmButton setEnabled:YES];
+        [self loginUser];
     } else {
-        [myRootRef createUser:self.usernameTextField.text password:self.passwordTextField.text
-     withValueCompletionBlock:^(NSError *error, NSDictionary *result) {
-             if (error) {
-                 // There was an error creating the account
-                 NSLog(@"Error - %@", error);
-                 self.errorMessageLabel.text = @"Sign up error";
-                 self.errorMessageLabel.hidden = NO;
-                 self.passwordTextField.text = @"";
-                 self.usernameTextField.text = @"";
-             } else {
-                 self.errorMessageLabel.hidden = YES;
-                 NSString *uid = [result objectForKey:@"uid"];
-                 NSLog(@"Successfully created user account with uid: %@", uid);
-                 self.errorMessageLabel.text = @"Sign up Successful";
-                 self.errorMessageLabel.hidden = NO;
-                 [self navigateToMainVC];
-             }
-        }];
-        [self.confirmButton setEnabled:YES];
-        
+        [self signUpUser];
     }
     
 }

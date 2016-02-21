@@ -29,7 +29,7 @@
         
         UINavigationController *navigation = (UINavigationController*)[mainStoryboard
                                                                        instantiateViewControllerWithIdentifier: @"mainNav"];
-        UIViewController* homeVC = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+        UIViewController* homeVC = [mainStoryboard instantiateViewControllerWithIdentifier:@"homeVC"];
         [navigation pushViewController:homeVC animated:NO];
         self.window.rootViewController = navigation;
         [self.window makeKeyAndVisible];
