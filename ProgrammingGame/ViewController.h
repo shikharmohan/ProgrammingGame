@@ -15,8 +15,6 @@
 @property (weak, nonatomic) IBOutlet UIImageView *friendEmoji;
 @property (weak, nonatomic) IBOutlet UILabel *myLabel;
 @property (weak, nonatomic) IBOutlet UILabel *friendLabel;
-@property (weak, nonatomic) IBOutlet UILabel *friendMask;
-@property (weak, nonatomic) IBOutlet UILabel *myMask;
 
 //letter to show
 @property (weak, nonatomic) IBOutlet UILabel *mainLetter;

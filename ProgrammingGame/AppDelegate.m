@@ -26,8 +26,6 @@
     //[ref unauth];
     if (ref.authData) {
         // user authenticated
-        NSLog(@"%@", ref.authData );
-        NSLog(@"Retrieving nickname %@ in app delegate", [mySession nickname]);
         self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
         UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
                                                                  bundle: nil];

@@ -207,7 +207,7 @@ NSArray *keyArr;
     
     UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
     
-    //[self.navigationController pushViewController:controller animated:YES];
+    [self.navigationController pushViewController:controller animated:YES];
 }
 
 

@@ -42,13 +42,13 @@
 #pragma mark - Firebase pull
 -(void) pullGameFromFirebase {
     Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
-    [ref observeEventType:FEventTypeChildChanged withBlock:^(FDataSnapshot *snapshot) {
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
         if (snapshot.value != [NSNull null]) {
             [mySession game][@"start"] = snapshot.value;
             [self setUpTurn];
         }
     } withCancelBlock:^(NSError *error) {
-        NSLog(@"%@", error.description);
+         NSLog(@"%@", error.description);
     }];
 }
 
@@ -56,21 +56,42 @@
 
 -(void) setUpTurn {
     if ([[mySession game][@"start"] isEqualToString:[mySession nickname]]) {
-        self.myMask.alpha = 0;
-        self.friendMask.alpha = 1;
-        self.keyboardMask.alpha = 0;
-        self.containerView.userInteractionEnabled = YES;
+        [UIView animateWithDuration:0.5
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.friendEmoji.alpha = 0.3;
+                             self.friendLabel.alpha = 0.3;
+                             self.myEmoji.alpha = 1;
+                             self.myLabel.alpha = 1;
+                             self.keyboardMask.alpha = 0;
+                         }
+                         completion:^(BOOL finished) {
+                             self.containerView.userInteractionEnabled = YES;
+                         }];
+        
     } else {
-        self.myMask.alpha = 1;
-        self.friendMask.alpha = 0;
-        self.keyboardMask.alpha = 1;
-        self.containerView.userInteractionEnabled = NO;
+        [UIView animateWithDuration:0.5
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseInOut
+                         animations:^{
+                             self.myEmoji.alpha = 0.3;
+                             self.myLabel.alpha = 0.3;
+                             self.friendEmoji.alpha = 1;
+                             self.friendLabel.alpha = 1;
+                             self.keyboardMask.alpha = 1;
+                         }
+                         completion:^(BOOL finished) {
+                             self.containerView.userInteractionEnabled = NO;
+                         }];
+       
+        
     }
     self.myLabel.text = [mySession nickname];
     self.friendLabel.text = [mySession game][@"name"];
 }
 
--(void) changeTurn {
+-(void) updateTurn {
     NSString *newTurn  = [mySession nickname];
     if ([[mySession game][@"start"] isEqualToString:[mySession nickname]]) { //if it is my turn
         self.containerView.userInteractionEnabled = YES;
@@ -121,11 +142,7 @@
                              self.mainLetter.alpha = 0; // fade letter out
                              self.keyboardMask.alpha = 1; //set up keyboard mask
                              
-                             //change masks of emojis
-                             self.myMask.alpha = 1;
-                             self.friendMask.alpha = 0;
-                             
-                             [self changeTurn];
+                             [self updateTurn];
                          }
                          completion:^(BOOL finished) {
                              [UIView animateWithDuration:0.5
