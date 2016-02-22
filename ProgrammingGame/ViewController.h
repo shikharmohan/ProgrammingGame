@@ -18,6 +18,7 @@
 
 //letter to show
 @property (weak, nonatomic) IBOutlet UILabel *mainLetter;
+@property (weak, nonatomic) IBOutlet UILabel *incomingLetter;
 
 //container view + mask
 @property (weak, nonatomic) IBOutlet UIView *containerView;

@@ -16,8 +16,8 @@
 @end
 
 @implementation ViewController
-
-
+bool firstTimeLetter;
+bool didSendLetter;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -28,8 +28,19 @@
                                                  name:@"KeyboardEntry"
                                                object:nil];
     
-    //get game
-    [self pullGameFromFirebase];
+    //first time through ref setup
+    firstTimeLetter = YES;
+    didSendLetter = NO;
+    
+    //hide all letters
+    self.mainLetter.alpha = 0;
+    self.incomingLetter.alpha = 0;
+    
+    //get game turn
+    [self pullGameTurnFromFirebase];
+    
+    //get game letter
+    [self pullGameLetterFromFirebase];
     
 }
 
@@ -40,7 +51,24 @@
 
 
 #pragma mark - Firebase pull
--(void) pullGameFromFirebase {
+-(void) pullGameLetterFromFirebase {
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession myRootRef].authData.uid]];
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
+        if (snapshot.value != [NSNull null]) {
+            [mySession game][@"letter"] = snapshot.value;
+            if (firstTimeLetter) {
+            firstTimeLetter = NO;
+            } else {
+                [self setUpLetter];
+            }
+            
+        }
+    } withCancelBlock:^(NSError *error) {
+        NSLog(@"%@", error.description);
+    }];
+}
+
+-(void) pullGameTurnFromFirebase {
     Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
     [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
         if (snapshot.value != [NSNull null]) {
@@ -52,7 +80,37 @@
     }];
 }
 
-#pragma mark - turn setup
+#pragma mark - turn & letter setup
+
+-(void) setUpLetter {
+    NSString *newLetter = [mySession game][@"letter"];
+    if ([newLetter length] > 1){
+        [self.incomingLetter setFont:[self.incomingLetter.font fontWithSize:60.0]];
+    } else {
+        [self.incomingLetter setFont:[self.incomingLetter.font fontWithSize:110.0]];
+    }
+    self.friendLabel.text = [NSString stringWithFormat:@"%@: %@", [mySession game][@"start"],[newLetter substringToIndex:1]];
+    self.myLabel.text = [mySession nickname];
+    self.incomingLetter.text = newLetter;
+    
+    [UIView animateWithDuration:0.5
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseInOut
+                     animations:^{
+                         self.incomingLetter.alpha = 1;
+                     }
+                     completion:^(BOOL finished) {
+                         [UIView animateWithDuration:0.3
+                                               delay:0.5
+                                             options:UIViewAnimationOptionCurveEaseInOut
+                                          animations:^{
+                                              self.incomingLetter.alpha = 0;
+                                          }
+                                          completion:^(BOOL finished) {
+                                              [self updateTurn];
+                                          }];
+                     }];
+}
 
 -(void) setUpTurn {
     if ([[mySession game][@"start"] isEqualToString:[mySession nickname]]) {
@@ -87,9 +145,14 @@
        
         
     }
-    self.myLabel.text = [mySession nickname];
-    self.friendLabel.text = [mySession game][@"name"];
+    if ([self.myLabel.text isEqualToString:@"Me"] || [self.friendLabel.text isEqualToString:@"Friend"]){
+        self.myLabel.text = [mySession nickname];
+        self.friendLabel.text = [mySession game][@"name"];
+    }
+    
 }
+
+
 
 -(void) updateTurn {
     NSString *newTurn  = [mySession nickname];
@@ -98,16 +161,19 @@
         newTurn = [mySession game][@"name"];
     } else {
         self.containerView.userInteractionEnabled = NO;
+        didSendLetter = NO;
     }
     
     Firebase *myRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
-    Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession game][@"uid"]]];
     
     [myRef setValue:newTurn];
-    [friendRef setValue:newTurn];
     
 }
 
+-(void) updateLetter:(NSString*) str {
+    Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession game][@"uid"]]];
+    [friendRef setValue:str];
+}
 
 #pragma mark - Push to Firebase
 
@@ -124,40 +190,44 @@
 - (void) receiveNotification:(NSNotification *) notification
 {
     if ([[notification name] isEqualToString:@"KeyboardEntry"]) {
-        NSDictionary *userInfo = notification.userInfo;
-        NSString *newLetter = (NSString*)[userInfo objectForKey:@"letter"];
-        //change size of letter depending on count
-        if ([newLetter length] > 1){
-            [self.mainLetter setFont:[self.mainLetter.font fontWithSize:60.0]];
-        } else {
-            [self.mainLetter setFont:[self.mainLetter.font fontWithSize:110.0]];
+        if (!didSendLetter) { //to prevent from double keyboard entry
+            didSendLetter = YES;
+            NSDictionary *userInfo = notification.userInfo;
+            NSString *newLetter = (NSString*)[userInfo objectForKey:@"letter"];
+            //change size of letter depending on count
+            if ([newLetter length] > 1){
+                [self.mainLetter setFont:[self.mainLetter.font fontWithSize:60.0]];
+            } else {
+                
+                [self.mainLetter setFont:[self.mainLetter.font fontWithSize:110.0]];
+            }
+            self.mainLetter.text = newLetter;
+            self.myLabel.text = [NSString stringWithFormat:@"%@: %@", [mySession nickname],[newLetter substringToIndex:1]];
+            self.friendLabel.text = [mySession game][@"name"];
+            self.mainLetter.alpha = 1;
+            [self updateTurn];
+            [self updateLetter:newLetter];
+            [UIView animateWithDuration:0.5
+                                  delay:0
+                                options:UIViewAnimationOptionCurveEaseIn
+                             animations:^{
+                                 self.mainLetter.transform = CGAffineTransformMakeTranslation(0, -150);
+                                 self.mainLetter.alpha = 0; // fade letter out
+                                 self.keyboardMask.alpha = 1; //set up keyboard mask
+                             }
+                             completion:^(BOOL finished) {
+                                 [UIView animateWithDuration:0.5
+                                                       delay:0
+                                                     options:UIViewAnimationOptionCurveEaseOut
+                                                  animations:^{
+                                                      self.mainLetter.transform = CGAffineTransformMakeTranslation(0,0);
+                                                  }
+                                                  completion:nil];
+                             }];
+
         }
-        self.mainLetter.text = newLetter;
-        self.mainLetter.alpha = 1;
-        [UIView animateWithDuration:0.8
-                              delay:0
-                            options:UIViewAnimationOptionCurveEaseIn
-                         animations:^{
-                             self.mainLetter.transform = CGAffineTransformMakeTranslation(0, -150);
-                             self.mainLetter.alpha = 0; // fade letter out
-                             self.keyboardMask.alpha = 1; //set up keyboard mask
-                             
-                             [self updateTurn];
-                         }
-                         completion:^(BOOL finished) {
-                             [UIView animateWithDuration:0.5
-                                                   delay:0
-                                                 options:UIViewAnimationOptionCurveEaseOut
-                                              animations:^{
-                                                  self.mainLetter.transform = CGAffineTransformMakeTranslation(0,0);
-                                                  
-                                              }
-                                              completion:nil];
-                         }];
         
     }
-    
-    
     
 }
 
