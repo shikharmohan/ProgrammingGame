@@ -84,7 +84,6 @@ bool didSendLetter;
 
 #pragma mark - turn & letter setup
 -(void) setUpLetter {
-    NSLog(@"letter received");
     NSString *newLetter = [mySession game][@"letter"];
     if ([newLetter length] > 1){
         [self.incomingLetter setFont:[self.incomingLetter.font fontWithSize:60.0]];
@@ -176,7 +175,6 @@ bool didSendLetter;
 }
 
 -(void) updateLetter:(NSString*) str {
-    NSLog(@"letter sent");
     Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession game][@"uid"]]];
     [friendRef setValue:str];
 }
