@@ -18,6 +18,7 @@
 @implementation ViewController
 bool firstTimeLetter;
 bool didSendLetter;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -41,6 +42,7 @@ bool didSendLetter;
     
     //get game letter
     [self pullGameLetterFromFirebase];
+    
     
 }
 
@@ -81,15 +83,15 @@ bool didSendLetter;
 }
 
 #pragma mark - turn & letter setup
-
 -(void) setUpLetter {
+    NSLog(@"letter received");
     NSString *newLetter = [mySession game][@"letter"];
     if ([newLetter length] > 1){
         [self.incomingLetter setFont:[self.incomingLetter.font fontWithSize:60.0]];
     } else {
         [self.incomingLetter setFont:[self.incomingLetter.font fontWithSize:110.0]];
     }
-    self.friendLabel.text = [NSString stringWithFormat:@"%@: %@", [mySession game][@"start"],[newLetter substringToIndex:1]];
+    self.friendLabel.text = [NSString stringWithFormat:@"%@: %@", [mySession game][@"name"],[newLetter substringToIndex:1]];
     self.myLabel.text = [mySession nickname];
     self.incomingLetter.text = newLetter;
     
@@ -127,6 +129,7 @@ bool didSendLetter;
                          completion:^(BOOL finished) {
                              self.containerView.userInteractionEnabled = YES;
                          }];
+        self.containerView.userInteractionEnabled = YES;
         
     } else {
         [UIView animateWithDuration:0.5
@@ -142,7 +145,8 @@ bool didSendLetter;
                          completion:^(BOOL finished) {
                              self.containerView.userInteractionEnabled = NO;
                          }];
-       
+        self.containerView.userInteractionEnabled = NO;
+        didSendLetter = NO;
         
     }
     if ([self.myLabel.text isEqualToString:@"Me"] || [self.friendLabel.text isEqualToString:@"Friend"]){
@@ -164,13 +168,15 @@ bool didSendLetter;
         didSendLetter = NO;
     }
     
+    Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession game][@"uid"]]];
     Firebase *myRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
-    
+    [friendRef setValue:newTurn];
     [myRef setValue:newTurn];
     
 }
 
 -(void) updateLetter:(NSString*) str {
+    NSLog(@"letter sent");
     Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession game][@"uid"]]];
     [friendRef setValue:str];
 }
@@ -205,7 +211,6 @@ bool didSendLetter;
             self.myLabel.text = [NSString stringWithFormat:@"%@: %@", [mySession nickname],[newLetter substringToIndex:1]];
             self.friendLabel.text = [mySession game][@"name"];
             self.mainLetter.alpha = 1;
-            [self updateTurn];
             [self updateLetter:newLetter];
             [UIView animateWithDuration:0.5
                                   delay:0
@@ -223,6 +228,9 @@ bool didSendLetter;
                                                       self.mainLetter.transform = CGAffineTransformMakeTranslation(0,0);
                                                   }
                                                   completion:nil];
+                                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                     [self setUpTurn];
+                                 });
                              }];
 
         }
