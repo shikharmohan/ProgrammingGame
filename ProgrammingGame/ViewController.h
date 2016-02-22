@@ -24,5 +24,11 @@
 @property (weak, nonatomic) IBOutlet UIView *containerView;
 @property (weak, nonatomic) IBOutlet UILabel *keyboardMask;
 
+//timer label
+@property (weak, nonatomic) IBOutlet UILabel *timerLabel;
+
+//quit
+@property (weak, nonatomic) IBOutlet UIButton *quitBtn;
+- (IBAction)quitPressed:(id)sender;
 @end
 

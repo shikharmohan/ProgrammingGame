@@ -122,6 +122,7 @@ NSArray *keyArr;
     NSDictionary *status = @{
                              @"uid": uid,
                              @"name" : friendUsername,
+                             @"letter" : @"a",
                              @"start" :[mySession nickname]
                              };
     [[ref childByAppendingPath:@"/game"] updateChildValues:status];

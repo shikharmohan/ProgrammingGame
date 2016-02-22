@@ -18,6 +18,7 @@
 @implementation ViewController
 bool firstTimeLetter;
 bool didSendLetter;
+double _ticks;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -43,7 +44,51 @@ bool didSendLetter;
     //get game letter
     [self pullGameLetterFromFirebase];
     
+    //set up quit btn
+    self.quitBtn.clipsToBounds = YES;
+    self.quitBtn.layer.cornerRadius = 5;
     
+    //set up timer
+   // _ticks = 300;
+   // NSTimer *_timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timerTick:) userInfo:nil repeats:YES];
+    [self setUpDeleteCallback];
+    
+}
+
+- (void) setUpDeleteCallback {
+    Firebase *myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid];
+    [myRef observeEventType:FEventTypeChildRemoved withBlock:^(FDataSnapshot *snapshot) {
+        NSLog(@"child has been deleted");
+        self.mainLetter.text = @"Bye!";
+        [UIView animateWithDuration:0.5
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseIn
+                         animations:^{
+                             self.keyboardMask.alpha = 1;
+                             self.mainLetter.alpha = 1;
+                             self.myEmoji.alpha = 0.3;
+                             self.myLabel.alpha = 0.3;
+                             self.friendEmoji.alpha = 0.3;
+                             self.friendLabel.alpha = 0.3;
+                             
+                         }
+                         completion:nil];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [[self navigationController] popViewControllerAnimated:YES];
+        });
+        
+    }];
+}
+
+- (void)timerTick:(NSTimer *)timer
+{
+    // Timers are not guaranteed to tick at the nominal rate specified, so this isn't technically accurate.
+    // However, this is just an example to demonstrate how to stop some ongoing activity, so we can live with that inaccuracy.
+    _ticks -= 1;
+    double seconds = fmod(_ticks, 60.0);
+    int minutes = fmod(trunc(_ticks / 60.0), 60.0);
+    double hours = trunc(_ticks / 3600.0);
+    self.timerLabel.text = [NSString stringWithFormat:@"%02.0d:%02.0f", minutes, seconds];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -127,8 +172,8 @@ bool didSendLetter;
                          }
                          completion:^(BOOL finished) {
                              self.containerView.userInteractionEnabled = YES;
+                             didSendLetter = NO;
                          }];
-        self.containerView.userInteractionEnabled = YES;
         
     } else {
         [UIView animateWithDuration:0.5
@@ -143,11 +188,11 @@ bool didSendLetter;
                          }
                          completion:^(BOOL finished) {
                              self.containerView.userInteractionEnabled = NO;
+                             didSendLetter = NO;
                          }];
-        self.containerView.userInteractionEnabled = NO;
-        didSendLetter = NO;
         
     }
+    
     if ([self.myLabel.text isEqualToString:@"Me"] || [self.friendLabel.text isEqualToString:@"Friend"]){
         self.myLabel.text = [mySession nickname];
         self.friendLabel.text = [mySession game][@"name"];
@@ -226,7 +271,7 @@ bool didSendLetter;
                                                       self.mainLetter.transform = CGAffineTransformMakeTranslation(0,0);
                                                   }
                                                   completion:nil];
-                                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                                      [self setUpTurn];
                                  });
                              }];
@@ -237,4 +282,41 @@ bool didSendLetter;
     
 }
 
+- (IBAction)quitPressed:(id)sender {
+    self.quitBtn.userInteractionEnabled = NO;
+    NSString *myUid = [mySession myRootRef].authData.uid;
+    NSString *friendUid = [mySession game][@"uid"];
+    NSString *myUsername = [mySession nickname];
+    NSString *friendUsername = [mySession game][@"name"];
+    
+    //update my friend list
+    Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
+    
+    NSDictionary *status = @{
+                             @"status": @"2",
+                             @"uid" : friendUid
+                             };
+    NSDictionary *newFriend = @{
+                                friendUsername: status
+                                };
+    [myRef updateChildValues:newFriend];
+    myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"game"];
+    [myRef removeValue];
+    
+    //update his friend list
+    Firebase *friendRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
+    
+    status = @{
+                             @"status": @"2",
+                             @"uid" : myUid
+                             };
+    newFriend = @{
+                                myUsername: status
+                                };
+    [friendRef updateChildValues:newFriend];
+    friendRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid] childByAppendingPath:@"game"];
+    [friendRef removeValue];
+    
+    
+}
 @end
