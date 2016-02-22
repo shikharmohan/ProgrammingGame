@@ -10,14 +10,20 @@
 #import <Firebase/Firebase.h>
 
 @interface ViewController : UIViewController
-@property (weak, nonatomic) IBOutlet UILabel *mainLetter;
-@property (weak, nonatomic) IBOutlet UIImageView *youEmoji;
-@property (weak, nonatomic) IBOutlet UILabel *youLabel;
-@property (weak, nonatomic) IBOutlet UIImageView *meEmoji;
-@property (weak, nonatomic) IBOutlet UILabel *meLabel;
-@property (weak, nonatomic) IBOutlet UILabel *meMask;
-@property (weak, nonatomic) IBOutlet UILabel *youMask;
+//avatars
+@property (weak, nonatomic) IBOutlet UIImageView *myEmoji;
+@property (weak, nonatomic) IBOutlet UIImageView *friendEmoji;
+@property (weak, nonatomic) IBOutlet UILabel *myLabel;
+@property (weak, nonatomic) IBOutlet UILabel *friendLabel;
+@property (weak, nonatomic) IBOutlet UILabel *friendMask;
+@property (weak, nonatomic) IBOutlet UILabel *myMask;
 
+//letter to show
+@property (weak, nonatomic) IBOutlet UILabel *mainLetter;
+
+//container view + mask
+@property (weak, nonatomic) IBOutlet UIView *containerView;
+@property (weak, nonatomic) IBOutlet UILabel *keyboardMask;
 
 @end
 

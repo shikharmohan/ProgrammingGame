@@ -12,6 +12,8 @@
 @synthesize nickname;
 @synthesize friends;
 @synthesize myRootRef;
+@synthesize game;
+@synthesize gameLines;
 
 + (id)sharedManager {
     static MySession *sharedMyManager = nil;
@@ -28,6 +30,8 @@
         friends = [[NSMutableDictionary alloc] init];
         myRootRef = [[Firebase alloc] initWithUrl:@"https://programminggame.firebaseio.com/"];
         nickname = @"";
+        gameLines = [[NSMutableArray alloc] init];
+        game = [[NSMutableDictionary alloc] init];
         if ([nickname isEqualToString:@""] && myRootRef.authData) {
             Firebase *ref = [[Firebase alloc] initWithUrl: [NSString stringWithFormat:@"https://programminggame.firebaseio.com/users/%@", myRootRef.authData.uid]];
             [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {

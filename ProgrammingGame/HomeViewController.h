@@ -9,16 +9,22 @@
 #import <UIKit/UIKit.h>
 
 @interface HomeViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
-@property (weak, nonatomic) IBOutlet UILabel *nicknameLabel;
-- (IBAction)addFriendPressed:(id)sender;
+//logout
 - (IBAction)logoutPressed:(id)sender;
-@property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property (weak, nonatomic) IBOutlet UIButton *addFriend;
-@property (weak, nonatomic) IBOutlet UIButton *addFriendLogo;
-@property (weak, nonatomic) IBOutlet UIView *addFriendView;
-- (IBAction)addCancellPressed:(id)sender;
 @property (weak, nonatomic) IBOutlet UIButton *logoutButton;
 
+//title
+@property (weak, nonatomic) IBOutlet UILabel *nicknameLabel;
 
+//add friend
+@property (weak, nonatomic) IBOutlet UIButton *addFriendLogo;
+@property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
+@property (weak, nonatomic) IBOutlet UILabel *errorMessage;
 @property (weak, nonatomic) IBOutlet UILabel *opaqueMask;
+- (IBAction)addFriendPressed:(id)sender;
+
+//table view
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+
+
 @end

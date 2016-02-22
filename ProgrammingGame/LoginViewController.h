@@ -11,16 +11,19 @@
 
 
 @interface LoginViewController : UIViewController
+
+//text fields
 @property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
-@property (weak, nonatomic) IBOutlet UIButton *confirmButton;
-@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
+@property (weak, nonatomic) IBOutlet UITextField *nicknameTextField;
+
+//labels
 @property (weak, nonatomic) IBOutlet UILabel *errorMessageLabel;
-@property (weak, nonatomic) IBOutlet UIButton *loginButton;
+@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
 
-@property (weak, nonatomic) IBOutlet UITextField *nicknameLabel;
-
-- (IBAction)pressedLogin:(id)sender;
-
+//buttons
+@property (weak, nonatomic) IBOutlet UIButton *confirmButton;
+@property (weak, nonatomic) IBOutlet UIButton *signupButton;
+- (IBAction)pressedSignup:(id)sender;
 - (IBAction)didConfirm:(id)sender;
 @end

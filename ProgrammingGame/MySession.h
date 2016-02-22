@@ -13,8 +13,11 @@
     NSString *nickname;
     NSMutableDictionary *friends;
     Firebase *myRootRef;
+    NSMutableArray *gameLines;
+    NSMutableDictionary *game;
 }
-
+@property (strong, nonatomic) NSMutableDictionary *game;
+@property (strong, nonatomic) NSMutableArray *gameLines;
 @property (strong, nonatomic) NSString* nickname;
 @property (strong, nonatomic) NSMutableDictionary *friends;
 @property (strong) Firebase *myRootRef;

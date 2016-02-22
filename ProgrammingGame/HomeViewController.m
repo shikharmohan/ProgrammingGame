@@ -12,17 +12,18 @@
 
 #define mySession [MySession sharedManager]
 
-@interface HomeViewController ()
+@interface HomeViewController () <UITextFieldDelegate>
 
 @end
 
 @implementation HomeViewController
-bool isContainerOpen;
 int numFriends;
 NSDictionary *statusMessages;
 NSArray *keyArr;
 
 - (void)viewDidLoad {
+    
+    //observers for changes on firebase server
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(receiveNotification:)
                                                  name:@"nicknameChanged"
@@ -31,16 +32,10 @@ NSArray *keyArr;
                                              selector:@selector(receiveNotification:)
                                                  name:@"friendsChanged"
                                                object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(receiveNotification:)
-                                                 name:@"friendAdded"
-                                               object:nil];
+    
     self.nicknameLabel.text = [mySession nickname];
-    self.addFriendView.translatesAutoresizingMaskIntoConstraints = YES;
-    isContainerOpen = NO;
-    self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
-                             self.addFriendView.frame.origin.y,
-                             self.addFriendView.frame.size.width,0);
+    
+    //table view setup
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
     
@@ -54,29 +49,48 @@ NSArray *keyArr;
         @"5" : @"GAME ON"
         };
     
+    //put observer on keybaord
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardDidShow:)
+                                                 name:UIKeyboardDidShowNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardDidHide:)
+                                                 name:UIKeyboardDidHideNotification
+                                               object:nil];
+    
     //retrieve friends:
+    [self retrieveFriends];
+    
+    //retrieve game
+    [self retrieveGame];
+    
+    [super viewDidLoad];
+}
+
+#pragma mark - Cleanup
+
+-(void)clearMemory {
+    [mySession setFriends:[[NSMutableDictionary alloc] init]];
+    [mySession setNickname:@""];
+    self.nicknameLabel.text = @"";
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - Firebase Handling
+-(void) retrieveFriends {
     Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData.uid]];
+    
     // Attach a block to read the data at our friends reference
     [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
         [self getFriendsArray];
     } withCancelBlock:^(NSError *error) {
         NSLog(@"%@", error.description);
     }];
-    
-    //setup game on scenario
-    ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game", [mySession myRootRef].authData.uid]];
-    // Attach a block to read the data at our friends reference
-    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-        [self navigateToGameVC];
-    } withCancelBlock:^(NSError *error) {
-        NSLog(@"%@", error.description);
-    }];
-    [super viewDidLoad];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 -(void)getFriendsArray {
@@ -86,8 +100,33 @@ NSArray *keyArr;
         [mySession setFriends:snapshot.value[@"friends"]];
         [[NSNotificationCenter defaultCenter] postNotificationName: @"friendsChanged" object:nil];
     }];
-
+    
 }
+
+-(void) retrieveGame {
+    //setup game on scenario
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game", [mySession myRootRef].authData.uid]];
+    
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        if (snapshot.value != [NSNull null]) {
+            [mySession setGame:snapshot.value];
+            [self navigateToGameVC];
+        }
+    } withCancelBlock:^(NSError *error) {
+        NSLog(@"%@", error.description);
+    }];
+}
+
+-(void)setUpGame:(NSString*)friendUsername withUid:(NSString*)uid withRef:(Firebase*)ref{
+    
+    NSDictionary *status = @{
+                             @"uid": uid,
+                             @"name" : friendUsername,
+                             @"start" :[mySession nickname]
+                             };
+    [[ref childByAppendingPath:@"/game"] updateChildValues:status];
+}
+
 
 - (void) sortDictionary {
     NSArray *myArray  = [[mySession friends] keysSortedByValueUsingComparator: ^(NSDictionary *obj1, NSDictionary *obj2) {
@@ -106,33 +145,49 @@ NSArray *keyArr;
     keyArr = myArray;
 }
 
+#pragma mark - Notification Handling
+
 - (void) receiveNotification:(NSNotification *) notification
 {
     if ([[notification name] isEqualToString:@"nicknameChanged"]) {
-        NSLog(@"Receivved nickname changed notif");
         self.nicknameLabel.text = [mySession nickname];
         [self getFriendsArray];
         
     } else if ([[notification name] isEqualToString:@"friendsChanged"]) {
-        NSLog(@"Receivved friends arr changed notif");
         [[mySession friends] removeObjectForKey:[mySession nickname]];
         [self sortDictionary];
         [self.tableView reloadData];
-    } else if ([[notification name] isEqualToString:@"friendAdded"]) {
-        NSLog(@"Receivved friends added notif");
-        [self closeContainer];
     }
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void)keyboardDidShow: (NSNotification *) notif{
+    self.tableView.userInteractionEnabled = NO;
+    self.logoutButton.userInteractionEnabled = NO;
+    [UIView animateWithDuration:0.8
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^{
+                         self.opaqueMask.alpha = 1;
+                     }
+                     completion:nil];
+    
 }
-*/
+
+- (void)keyboardDidHide: (NSNotification *) notif{
+    self.tableView.userInteractionEnabled = YES;
+    self.logoutButton.userInteractionEnabled = YES;
+    [UIView animateWithDuration:0.8
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         self.opaqueMask.alpha = 0;
+                     }
+                     completion:nil];
+}
+
+
+
+#pragma mark - Navigation
 
 -(void)navigateToLogin {
     UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
@@ -143,110 +198,149 @@ NSArray *keyArr;
     [self.navigationController pushViewController:controller animated:YES];
 }
 
--(void) openContainer {
-    [self.logoutButton setUserInteractionEnabled:NO];
-    [self.tableView setUserInteractionEnabled:NO];
-    [UIView animateWithDuration:0.5
-                     animations:^{
-                         self.opaqueMask.alpha = 1;
-                     }];
+-(void)navigateToGameVC {
+    Firebase *remRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game", [mySession myRootRef].authData.uid]];
+    [remRef removeAllObservers];
     
-    self.addFriendView.hidden = NO;
-    [self.addFriendLogo setTitle:@"x" forState:UIControlStateNormal];
-    UIView* viewB = [[self.childViewControllers.lastObject view] superview];
-    [UIView animateWithDuration:1.0
-                     animations:^{
-                         viewB.frame = CGRectMake( self.addFriendView.frame.origin.x,
-                                                               self.addFriendView.frame.origin.y,
-                                                               self.addFriendView.frame.size.width,
-                                                               self.addFriendView.frame.size.height + 80);
-                     }
-                     completion:^(BOOL finished){
-                         [self.addFriendLogo setEnabled:YES];
-                         isContainerOpen = YES;
-                         viewB.userInteractionEnabled = YES;
-                         // whatever you need to do when animations are complete
-                     }];
+    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
+                                                             bundle: nil];
+    
+    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
+    
+    //[self.navigationController pushViewController:controller animated:YES];
 }
+
+
+#pragma mark - Keyboard
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [self.view endEditing:YES];
 }
 
--(void)closeContainer {
-    [self.view endEditing:YES];
-    [self.addFriendLogo setTitle:@"+" forState:UIControlStateNormal];
-    [UIView animateWithDuration:0.5
-                     animations:^{
-                         self.opaqueMask.alpha = 0;
-                     }];
-    [UIView animateWithDuration:1.0
-                     animations:^{
-                         self.addFriendView.frame = CGRectMake( self.addFriendView.frame.origin.x,
-                                                               self.addFriendView.frame.origin.y,
-                                                               self.addFriendView.frame.size.width,
-                                                               self.addFriendView.frame.size.height - 80);
-                     }
-                     completion:^(BOOL finished){
-                         [self.logoutButton setUserInteractionEnabled:YES];
-                         [self.tableView setUserInteractionEnabled:YES];
-                         [self.addFriendLogo setEnabled:YES];
-                         [self.addFriend setEnabled:YES];
-                         isContainerOpen = NO;
-                         self.addFriendView.hidden = YES;
-                         // whatever you need to do when animations are complete
-                     }];
+-(BOOL)textFieldShouldReturn:(UITextField*)textField
+{
+    if ([textField isEqual:self.usernameTextField]) {
+        [self.usernameTextField resignFirstResponder];
+    }
+    return NO;
 }
+
+
+#pragma mark - Add Friend Methods
 
 - (IBAction)addFriendPressed:(id)sender {
-    [self.addFriend setEnabled:NO];
-    [self.addFriendLogo setEnabled:NO];
-    if (!isContainerOpen) {
-        [self openContainer];
+    [self.addFriendLogo setUserInteractionEnabled:NO];
+    if ([self.usernameTextField.text isEqualToString:@""]) { //nothing was entered
+        self.usernameTextField.text = @"";
+        self.errorMessage.text = @"No name entered!";
+        [self.addFriendLogo setUserInteractionEnabled:YES];
+    } else if ([self.usernameTextField.text isEqualToString:[mySession nickname]]) { //trying to add themselves
+        self.usernameTextField.text = @"";
+        self.errorMessage.text = @"You cannot add yourself";
+        [self.addFriendLogo setUserInteractionEnabled:YES];
+    } else {
+        //check if user exists in usersRef
+        Firebase *ref = [[Firebase alloc] initWithUrl: @"https://programminggame.firebaseio.com/usersRef"];
+        [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+            if (!snapshot.value[self.usernameTextField.text]) { //user does not exist
+                self.usernameTextField.text = @"";
+                self.errorMessage.text = @"Username not found";
+                [self.addFriendLogo setUserInteractionEnabled:YES];
+            } else { //user has been found
+                //add friend request to my file
+                NSString *myUid = [mySession myRootRef].authData.uid;
+                NSString *friendUid = snapshot.value[self.usernameTextField.text];
+                NSString *myUsername = [mySession nickname];
+                NSString *friendUsername = self.usernameTextField.text;
+                
+                
+                __block bool shouldBeTwo = NO; //if you are now friends
+                //get friend's list to see if he sent a request to us
+                Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
+                [friendsRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                    NSString *s = @"1";
+                    if (snapshot.value[myUsername]) {//if he has added you as a friend
+                        s = @"2";
+                        shouldBeTwo = YES;
+                    }
+                    NSDictionary *status = @{
+                                             @"status": s,
+                                             @"uid" : myUid
+                                             };
+                    NSDictionary *newFriend = @{
+                                                myUsername: status
+                                                };
+                    [friendsRef updateChildValues:newFriend];
+                    
+                    //get my file to see if I have already sent a request to friend
+                    __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
+                    [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+                        NSString *s = @"0";
+                        if (shouldBeTwo) {
+                            s = @"2";
+                        } else if (snapshot.value[friendUsername]) {//if i have already added him as a friend
+                            s = snapshot.value[friendUsername][@"status"];
+                        }
+                        
+                        NSDictionary *status = @{
+                                                 @"status": s,
+                                                 @"uid" : friendUid
+                                                 };
+                        NSDictionary *newFriend = @{
+                                                    friendUsername: status
+                                                    };
+                        [myRef updateChildValues:newFriend];
+                        
+                        self.usernameTextField.text = @"";
+                        self.errorMessage.text = @"Friend added!";
+                        
+                    }];
+                    [self.addFriendLogo setUserInteractionEnabled:YES];
+                }];
+            }
+        }];
     }
+    [self.view endEditing:YES];
     
+    [self fadeErrorMessage];
     
-
 }
 
--(void)clearMemory {
-    [mySession setFriends:[[NSMutableDictionary alloc] init]];
-    [mySession setNickname:@""];
-    self.nicknameLabel.text = @"";
+-(void) fadeErrorMessage {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.4
+                              delay:0
+                            options:UIViewAnimationOptionCurveEaseOut
+                         animations:^{
+                             self.errorMessage.alpha = 0;
+                             
+                         }
+                         completion:^(BOOL finished) {
+                             self.errorMessage.text = @"";
+                             self.errorMessage.alpha = 1;
+                         }];
+        
+    });
 }
+
+#pragma mark - Logout
 
 - (IBAction)logoutPressed:(id)sender {
     [[mySession myRootRef] unauth];
     [self clearMemory];
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
-- (IBAction)addCancellPressed:(id)sender {
-    if (isContainerOpen) {
-        [self closeContainer];
-    } else {
-        [self openContainer];
-    }
-}
+
 
 
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-#warning Incomplete implementation, return the number of sections
     return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-#warning Incomplete implementation, return the number of rows
     return [[mySession friends] count];
-}
--(void)navigateToGameVC {
-    UIStoryboard *mainStoryboard = [UIStoryboard storyboardWithName:@"Main"
-                                                             bundle: nil];
-    
-    UIViewController* controller = [mainStoryboard instantiateViewControllerWithIdentifier:@"gameVC"];
-    
-    [self.navigationController pushViewController:controller animated:YES];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -254,23 +348,11 @@ NSArray *keyArr;
     
     NSString *aKey = [keyArr objectAtIndex:[indexPath row]];
     customCell.friendLabel.text = aKey;
-    NSLog(@"Message status %@", [mySession friends][aKey][@"status"]);
     NSString *msg = statusMessages[[mySession friends][aKey][@"status"]];
     customCell.statusMessage.text = msg;
     return customCell;
 }
 
-
-
-
--(void)setUpGame:(NSString*)friendUsername withUid:(NSString*)uid withRef:(Firebase*)ref{
-    
-        NSDictionary *status = @{
-                                 @"uid": uid,
-                                 @"name" : friendUsername
-                                 };
-    [[ref childByAppendingPath:@"/game"] updateChildValues:status];
-}
 
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -332,11 +414,7 @@ NSArray *keyArr;
             [myRef updateChildValues:newFriend];
             
         }];
-
-
     }
-    
-    
     
 }
 
