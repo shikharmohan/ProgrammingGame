@@ -72,6 +72,14 @@ double _ticks;
                              
                          }
                          completion:nil];
+        [myRef removeAllObservers];
+        
+        //remove turn and letter observer
+        Firebase *removeRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession myRootRef].authData.uid]];
+        [removeRef removeAllObservers];
+        removeRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
+        [removeRef removeAllObservers];
+        
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [[self navigationController] popViewControllerAnimated:YES];
         });

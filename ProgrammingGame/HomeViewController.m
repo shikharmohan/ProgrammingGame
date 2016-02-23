@@ -286,6 +286,12 @@ NSArray *keyArr;
 #pragma mark - Logout
 
 - (IBAction)logoutPressed:(id)sender {
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/friends", [mySession myRootRef].authData.uid]];
+    [ref removeAllObservers]; //remove friend updates observers
+    
+     ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game", [mySession myRootRef].authData.uid]];
+    [ref removeAllObservers]; //remove game updates observers
+    
     [[mySession myRootRef] unauth];
     [self clearMemory];
     [self.navigationController popToRootViewControllerAnimated:YES];
