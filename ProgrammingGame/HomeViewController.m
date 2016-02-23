@@ -51,13 +51,15 @@ NSArray *keyArr;
     
     //put observer on keybaord
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardDidShow:)
-                                                 name:UIKeyboardDidShowNotification
+                                             selector:@selector(keyboardWillShow:)
+                                                 name:UIKeyboardWillShowNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardDidHide:)
-                                                 name:UIKeyboardDidHideNotification
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
                                                object:nil];
+    self.tableView.userInteractionEnabled = YES;
+    self.opaqueMask.userInteractionEnabled = NO;
     
     //retrieve friends:
     [self retrieveFriends];
@@ -161,31 +163,6 @@ NSArray *keyArr;
     }
 }
 
-- (void)keyboardDidShow: (NSNotification *) notif{
-    self.tableView.userInteractionEnabled = NO;
-    self.logoutButton.userInteractionEnabled = NO;
-    [UIView animateWithDuration:0.8
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseIn
-                     animations:^{
-                         self.opaqueMask.alpha = 1;
-                     }
-                     completion:nil];
-    
-}
-
-- (void)keyboardDidHide: (NSNotification *) notif{
-    self.tableView.userInteractionEnabled = YES;
-    self.logoutButton.userInteractionEnabled = YES;
-    [UIView animateWithDuration:0.8
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut
-                     animations:^{
-                         self.opaqueMask.alpha = 0;
-                     }
-                     completion:nil];
-}
-
 
 
 #pragma mark - Navigation
@@ -214,6 +191,33 @@ NSArray *keyArr;
 
 #pragma mark - Keyboard
 
+- (void)keyboardWillShow: (NSNotification *) notif{
+    self.tableView.userInteractionEnabled = NO;
+    self.logoutButton.userInteractionEnabled = NO;
+    self.opaqueMask.userInteractionEnabled = YES;
+    [UIView animateWithDuration:0.4
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseIn
+                     animations:^{
+                         self.opaqueMask.alpha = 1;
+                     }
+                     completion:nil];
+    
+}
+
+- (void)keyboardWillHide: (NSNotification *) notif{
+    self.tableView.userInteractionEnabled = YES;
+    self.logoutButton.userInteractionEnabled = YES;
+    self.opaqueMask.userInteractionEnabled = NO;
+    [UIView animateWithDuration:0.8
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut
+                     animations:^{
+                         self.opaqueMask.alpha = 0;
+                     }
+                     completion:nil];
+}
+
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     [self.view endEditing:YES];
 }
@@ -231,78 +235,32 @@ NSArray *keyArr;
 
 - (IBAction)addFriendPressed:(id)sender {
     [self.addFriendLogo setUserInteractionEnabled:NO];
-    if ([self.usernameTextField.text isEqualToString:@""]) { //nothing was entered
-        self.usernameTextField.text = @"";
+    NSString *usernameEntered = self.usernameTextField.text;
+    self.usernameTextField.text = @"";
+    if ([usernameEntered isEqualToString:@""]) { //nothing was entered
         self.errorMessage.text = @"No name entered!";
         [self.addFriendLogo setUserInteractionEnabled:YES];
-    } else if ([self.usernameTextField.text isEqualToString:[mySession nickname]]) { //trying to add themselves
-        self.usernameTextField.text = @"";
+    } else if ([usernameEntered isEqualToString:[mySession nickname]]) { //trying to add themselves
         self.errorMessage.text = @"You cannot add yourself";
         [self.addFriendLogo setUserInteractionEnabled:YES];
     } else {
         //check if user exists in usersRef
         Firebase *ref = [[Firebase alloc] initWithUrl: @"https://programminggame.firebaseio.com/usersRef"];
         [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-            if (!snapshot.value[self.usernameTextField.text]) { //user does not exist
-                self.usernameTextField.text = @"";
+            if (!snapshot.value[usernameEntered]) { //user does not exist
                 self.errorMessage.text = @"Username not found";
                 [self.addFriendLogo setUserInteractionEnabled:YES];
             } else { //user has been found
-                //add friend request to my file
                 NSString *myUid = [mySession myRootRef].authData.uid;
-                NSString *friendUid = snapshot.value[self.usernameTextField.text];
+                NSString *friendUid = snapshot.value[usernameEntered];
                 NSString *myUsername = [mySession nickname];
-                NSString *friendUsername = self.usernameTextField.text;
+                NSString *friendUsername = usernameEntered;
                 
-                
-                __block bool shouldBeTwo = NO; //if you are now friends
-                //get friend's list to see if he sent a request to us
-                Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
-                [friendsRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                    NSString *s = @"1";
-                    if (snapshot.value[myUsername]) {//if he has added you as a friend
-                        s = @"2";
-                        shouldBeTwo = YES;
-                    }
-                    NSDictionary *status = @{
-                                             @"status": s,
-                                             @"uid" : myUid
-                                             };
-                    NSDictionary *newFriend = @{
-                                                myUsername: status
-                                                };
-                    [friendsRef updateChildValues:newFriend];
-                    
-                    //get my file to see if I have already sent a request to friend
-                    __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
-                    [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-                        NSString *s = @"0";
-                        if (shouldBeTwo) {
-                            s = @"2";
-                        } else if (snapshot.value[friendUsername]) {//if i have already added him as a friend
-                            s = snapshot.value[friendUsername][@"status"];
-                        }
-                        
-                        NSDictionary *status = @{
-                                                 @"status": s,
-                                                 @"uid" : friendUid
-                                                 };
-                        NSDictionary *newFriend = @{
-                                                    friendUsername: status
-                                                    };
-                        [myRef updateChildValues:newFriend];
-                        
-                        self.usernameTextField.text = @"";
-                        self.errorMessage.text = @"Friend added!";
-                        
-                    }];
-                    [self.addFriendLogo setUserInteractionEnabled:YES];
-                }];
+                [self updateStatusFromAdd:usernameEntered withUid:myUid withFriendUid:friendUid withFriendUsername:friendUsername withMyUsername:myUsername];
             }
         }];
     }
     [self.view endEditing:YES];
-    
     [self fadeErrorMessage];
     
 }
@@ -332,7 +290,58 @@ NSArray *keyArr;
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
+#pragma mark - Status updates
 
+- (void) updateStatusFromAdd:(NSString *)username withUid:(NSString *)refUid withFriendUid:(NSString *)friendUid withFriendUsername:(NSString *)friendUsername withMyUsername:(NSString *)myUsername{
+    Firebase *ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:refUid]  childByAppendingPath:@"friends"];
+    [ref observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
+        if (snapshot.value[username]) { //you are friend with that person
+            NSString *snapValue = snapshot.value[username][@"status"];
+            if ([snapValue isEqualToString:@"1"]) {
+                [self updateStatus:@"2" withUid:friendUid withFriendUid:refUid withFriendUsername:myUsername]; //update friend list
+                [self updateStatus:@"2" withUid:refUid withFriendUid:friendUid withFriendUsername:friendUsername]; //update my friend list
+            }
+            if ([snapValue isEqualToString:@"0"]) {
+                self.errorMessage.text = @"Already sent request";
+            } else if ([snapValue isEqualToString:@"1"]) {
+                self.errorMessage.text = @"Accepted friend request";
+            } else {
+                self.errorMessage.text = @"Already friends";
+            }
+        } else { //you become friends
+            [self updateStatus:@"0" withUid:refUid withFriendUid:friendUid withFriendUsername:friendUsername];
+            [self updateStatus:@"1" withUid:friendUid withFriendUid:refUid withFriendUsername:myUsername];
+            self.errorMessage.text = @"Friend added!";
+        }
+        [self.addFriendLogo setUserInteractionEnabled:YES];
+    }];
+}
+
+-(void) updateStatus:(NSString *)s withUid:(NSString *)refUid withFriendUid:(NSString *)friendUid withFriendUsername:(NSString *)friendUsername {
+    Firebase *ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:refUid]  childByAppendingPath:@"friends"];
+    if ([s isEqualToString:@"-1"]) { //potentially remove it?
+        //[[ref childByAppendingPath:friendUsername] removeValue];
+    } else {
+        NSDictionary *status = @{
+                                 @"status": s,
+                                 @"uid" : friendUid
+                                 };
+        
+        NSDictionary *updatedFriend = @{
+                                        friendUsername: status
+                                        };
+        [ref updateChildValues:updatedFriend withCompletionBlock:^(NSError *error, Firebase *ref) {
+            if (error) {
+                NSLog(@"Error updating status%@", error);
+            }
+            
+        }];
+        if ([s isEqualToString:@"5"]) {
+            [self setUpGame:friendUsername withUid:friendUid withRef:[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:refUid]];
+        }
+    }
+    
+}
 
 #pragma mark - Table view data source
 
@@ -358,65 +367,44 @@ NSArray *keyArr;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSDictionary *reverseStatus = @{
+                      @"friend request sent" : @"0",
+                      @"accept friend request" : @"1",
+                      @"friends" : @"2",
+                      @"game request sent" : @"3",
+                      @"accept game request" : @"4",
+                      @"GAME ON" : @"5"
+                      };
+    NSDictionary *statusEquivalence = @{
+                          @"0" : @"-1",
+                          @"1" : @"2",
+                          @"2" : @"3",
+                          @"3": @"2",
+                          @"4": @"5",
+                          @"5": @"5",
+                          };
+    NSDictionary *friendEquivalence = @{
+                          @"0" : @"-1",
+                          @"1" : @"2",
+                          @"2" : @"4",
+                          @"3": @"2",
+                          @"4": @"5",
+                          @"5": @"5",
+                          };
     
     FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
-    //add friend request to my file
     NSString *myUid = [mySession myRootRef].authData.uid;
     NSString *friendUid = [mySession friends][cell.friendLabel.text][@"uid"];
     NSString *myUsername = [mySession nickname];
     NSString *friendUsername = cell.friendLabel.text;
+    NSString *friendStatus = friendEquivalence[reverseStatus[cell.statusMessage.text]];
+    NSString *myStatus = statusEquivalence[reverseStatus[cell.statusMessage.text]];
     
+    //update friend list
+    [self updateStatus:friendStatus withUid:friendUid withFriendUid:myUid withFriendUsername:myUsername];
     
-    if ([cell.statusMessage.text isEqualToString:statusMessages[@"2"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"1"]] || [cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) {
-        //get friend's list to see if he sent a request to us
-        Firebase *friendsRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]  childByAppendingPath:@"friends"];
-        [friendsRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-            NSString *s;
-            if ([cell.statusMessage.text isEqualToString:statusMessages[@"1"]]) { //you are accepting his friend request
-                s = @"2";
-            } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
-                s = @"5";
-                [self setUpGame:myUsername withUid:myUid withRef:[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:friendUid]];
-            } else { //you are sending a game request
-                s = @"4";
-            }
-           
-            NSDictionary *status = @{
-                                     @"status": s,
-                                     @"uid" : myUid
-                                     };
-            NSDictionary *newFriend = @{
-                                        myUsername: status
-                                        };
-            [friendsRef updateChildValues:newFriend];
-            
-        }];
-        
-        //get my file to see if I have already sent a request to friend
-        __block Firebase *myRef = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]  childByAppendingPath:@"friends"];
-        [myRef observeSingleEventOfType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {
-            NSString *s;
-            if ([cell.statusMessage.text isEqualToString:statusMessages[@"1"]]) { //you are accepting his friend request
-                s = @"2";
-            } else if ([cell.statusMessage.text isEqualToString:statusMessages[@"4"]]) { // you are accepting his game request
-                s = @"5";
-                [self setUpGame:friendUsername withUid:friendUid withRef:[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:myUid]];
-            } else { //you are sending a game request
-                s = @"3";
-            }
-            
-            NSDictionary *status = @{
-                                     @"status": s,
-                                     @"uid" : friendUid
-                                     };
-            NSDictionary *newFriend = @{
-                                        friendUsername: status
-                                        };
-            [myRef updateChildValues:newFriend];
-            
-        }];
-    }
-    
+    //update my friend list
+    [self updateStatus:myStatus withUid:myUid withFriendUid:friendUid withFriendUsername:friendUsername];
 }
 
 @end

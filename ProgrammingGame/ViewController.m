@@ -58,7 +58,6 @@ double _ticks;
 - (void) setUpDeleteCallback {
     Firebase *myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid];
     [myRef observeEventType:FEventTypeChildRemoved withBlock:^(FDataSnapshot *snapshot) {
-        NSLog(@"child has been deleted");
         self.mainLetter.text = @"Bye!";
         [UIView animateWithDuration:0.5
                               delay:0
