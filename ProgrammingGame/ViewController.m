@@ -109,6 +109,7 @@ double _ticks;
 - (void) setUpDeleteCallback {
     Firebase *myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid];
     [myRef observeEventType:FEventTypeChildRemoved withBlock:^(FDataSnapshot *snapshot) {
+        [self.mainLetter setFont:[self.incomingLetter.font fontWithSize:110.0]];
         self.mainLetter.text = @"Bye!";
         [UIView animateWithDuration:0.5
                               delay:0
