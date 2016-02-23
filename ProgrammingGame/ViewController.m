@@ -55,6 +55,57 @@ double _ticks;
     
 }
 
+
+- (void)timerTick:(NSTimer *)timer
+{
+    // Timers are not guaranteed to tick at the nominal rate specified, so this isn't technically accurate.
+    // However, this is just an example to demonstrate how to stop some ongoing activity, so we can live with that inaccuracy.
+    _ticks -= 1;
+    double seconds = fmod(_ticks, 60.0);
+    int minutes = fmod(trunc(_ticks / 60.0), 60.0);
+    self.timerLabel.text = [NSString stringWithFormat:@"%02.0d:%02.0f", minutes, seconds];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+#pragma mark - Firebase handling
+-(void) pullGameLetterFromFirebase {
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession myRootRef].authData.uid]];
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
+        if (snapshot.value != [NSNull null]) {
+            if (firstTimeLetter) {
+                firstTimeLetter = NO;
+            } else if (![snapshot.value isEqualToString:@"-1"]){
+                if (![[mySession game][@"start"] isEqualToString:[mySession nickname]]) { //if not my turn
+                    [mySession game][@"letter"] = snapshot.value;
+                    [self clearLetter];
+                    [self setUpLetter];
+                }
+                
+            }
+            
+        }
+    } withCancelBlock:^(NSError *error) {
+        NSLog(@"%@", error.description);
+    }];
+}
+
+-(void) pullGameTurnFromFirebase {
+    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
+    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
+        if (snapshot.value != [NSNull null]) {
+            [mySession game][@"start"] = snapshot.value;
+            [self setUpTurn];
+        }
+    } withCancelBlock:^(NSError *error) {
+         NSLog(@"%@", error.description);
+    }];
+}
+
 - (void) setUpDeleteCallback {
     Firebase *myRef = [[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:[mySession myRootRef].authData.uid];
     [myRef observeEventType:FEventTypeChildRemoved withBlock:^(FDataSnapshot *snapshot) {
@@ -84,53 +135,6 @@ double _ticks;
             [[self navigationController] popViewControllerAnimated:YES];
         });
         
-    }];
-}
-
-- (void)timerTick:(NSTimer *)timer
-{
-    // Timers are not guaranteed to tick at the nominal rate specified, so this isn't technically accurate.
-    // However, this is just an example to demonstrate how to stop some ongoing activity, so we can live with that inaccuracy.
-    _ticks -= 1;
-    double seconds = fmod(_ticks, 60.0);
-    int minutes = fmod(trunc(_ticks / 60.0), 60.0);
-    double hours = trunc(_ticks / 3600.0);
-    self.timerLabel.text = [NSString stringWithFormat:@"%02.0d:%02.0f", minutes, seconds];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-
-#pragma mark - Firebase pull
--(void) pullGameLetterFromFirebase {
-    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession myRootRef].authData.uid]];
-    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
-        if (snapshot.value != [NSNull null]) {
-            [mySession game][@"letter"] = snapshot.value;
-            if (firstTimeLetter) {
-            firstTimeLetter = NO;
-            } else {
-                [self setUpLetter];
-            }
-            
-        }
-    } withCancelBlock:^(NSError *error) {
-        NSLog(@"%@", error.description);
-    }];
-}
-
--(void) pullGameTurnFromFirebase {
-    Firebase *ref = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
-    [ref observeEventType:FEventTypeValue withBlock:^(FDataSnapshot *snapshot) {//observe turn change
-        if (snapshot.value != [NSNull null]) {
-            [mySession game][@"start"] = snapshot.value;
-            [self setUpTurn];
-        }
-    } withCancelBlock:^(NSError *error) {
-         NSLog(@"%@", error.description);
     }];
 }
 
@@ -218,7 +222,6 @@ double _ticks;
         self.containerView.userInteractionEnabled = NO;
         didSendLetter = NO;
     }
-    
     Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession game][@"uid"]]];
     Firebase *myRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/start", [mySession myRootRef].authData.uid]];
     [friendRef setValue:newTurn];
@@ -230,6 +233,12 @@ double _ticks;
     Firebase *friendRef = [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession game][@"uid"]]];
     [friendRef setValue:str];
 }
+
+-(void) clearLetter {
+    Firebase *myRef= [[mySession myRootRef] childByAppendingPath: [NSString stringWithFormat:@"users/%@/game/letter", [mySession myRootRef].authData.uid]];
+    [myRef setValue:@"-1"];
+}
+
 
 #pragma mark - Push to Firebase
 
@@ -247,6 +256,7 @@ double _ticks;
 {
     if ([[notification name] isEqualToString:@"KeyboardEntry"]) {
         if (!didSendLetter) { //to prevent from double keyboard entry
+            //NSLog(@"1 Received keyboard letter");
             didSendLetter = YES;
             NSDictionary *userInfo = notification.userInfo;
             NSString *newLetter = (NSString*)[userInfo objectForKey:@"letter"];
@@ -278,9 +288,6 @@ double _ticks;
                                                       self.mainLetter.transform = CGAffineTransformMakeTranslation(0,0);
                                                   }
                                                   completion:nil];
-                                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                                     [self setUpTurn];
-                                 });
                              }];
 
         }
@@ -288,6 +295,8 @@ double _ticks;
     }
     
 }
+
+#pragma mark - Quit handling
 
 - (IBAction)quitPressed:(id)sender {
     self.quitBtn.userInteractionEnabled = NO;
