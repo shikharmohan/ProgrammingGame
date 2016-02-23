@@ -38,6 +38,7 @@ NSArray *keyArr;
     //table view setup
     self.tableView.dataSource = self;
     self.tableView.delegate = self;
+    self.tableView.allowsMultipleSelectionDuringEditing = NO;
     
     //status messages
     statusMessages = @{
@@ -319,8 +320,10 @@ NSArray *keyArr;
 
 -(void) updateStatus:(NSString *)s withUid:(NSString *)refUid withFriendUid:(NSString *)friendUid withFriendUsername:(NSString *)friendUsername {
     Firebase *ref = [[[[mySession myRootRef] childByAppendingPath:@"users"] childByAppendingPath:refUid]  childByAppendingPath:@"friends"];
-    if ([s isEqualToString:@"-1"]) { //potentially remove it?
-        //[[ref childByAppendingPath:friendUsername] removeValue];
+    if ([s isEqualToString:@"-1"]) {
+        [[ref childByAppendingPath:friendUsername] removeValue];
+    } else if ([s isEqualToString:@"-2"]) {
+        //do nothing
     } else {
         NSDictionary *status = @{
                                  @"status": s,
@@ -343,7 +346,7 @@ NSArray *keyArr;
     
 }
 
-#pragma mark - Table view data source
+#pragma mark - Table view
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return 1;
@@ -351,6 +354,11 @@ NSArray *keyArr;
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [[mySession friends] count];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return YES if you want the specified item to be editable.
+    return YES;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -363,7 +371,36 @@ NSArray *keyArr;
     return customCell;
 }
 
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        NSLog(@"wants to delete user");
+        //add code here for when you hit delete
+    }
+}
 
+
+-(NSArray *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewRowAction *deleteBtn = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"Unfriend" handler:^(UITableViewRowAction *action, NSIndexPath *indexPath)
+                                    {
+                                        //remove friendhsip
+                                        FriendsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                                        NSString *myUid = [mySession myRootRef].authData.uid;
+                                        NSString *friendUid = [mySession friends][cell.friendLabel.text][@"uid"];
+                                        NSString *myUsername = [mySession nickname];
+                                        NSString *friendUsername = cell.friendLabel.text;
+                                        
+                                        //update friend list
+                                        [self updateStatus:@"-1" withUid:friendUid withFriendUid:myUid withFriendUsername:myUsername];
+                                        
+                                        //update my friend list
+                                        [self updateStatus:@"-1" withUid:myUid withFriendUid:friendUid withFriendUsername:friendUsername];
+                                        self.errorMessage.text = [NSString stringWithFormat:@"Unfriended %@", friendUsername];
+                                        [self fadeErrorMessage];
+                                    }];
+    deleteBtn.backgroundColor = [UIColor  lightGrayColor];
+    
+    return @[deleteBtn];
+}
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -376,7 +413,7 @@ NSArray *keyArr;
                       @"GAME ON" : @"5"
                       };
     NSDictionary *statusEquivalence = @{
-                          @"0" : @"-1",
+                          @"0" : @"-2",
                           @"1" : @"2",
                           @"2" : @"3",
                           @"3": @"2",
@@ -384,7 +421,7 @@ NSArray *keyArr;
                           @"5": @"5",
                           };
     NSDictionary *friendEquivalence = @{
-                          @"0" : @"-1",
+                          @"0" : @"-2",
                           @"1" : @"2",
                           @"2" : @"4",
                           @"3": @"2",
@@ -397,14 +434,26 @@ NSArray *keyArr;
     NSString *friendUid = [mySession friends][cell.friendLabel.text][@"uid"];
     NSString *myUsername = [mySession nickname];
     NSString *friendUsername = cell.friendLabel.text;
-    NSString *friendStatus = friendEquivalence[reverseStatus[cell.statusMessage.text]];
-    NSString *myStatus = statusEquivalence[reverseStatus[cell.statusMessage.text]];
+    NSString *cellStatus = reverseStatus[cell.statusMessage.text];
+    NSString *friendStatus = friendEquivalence[cellStatus];
+    NSString *myStatus = statusEquivalence[cellStatus];
     
     //update friend list
     [self updateStatus:friendStatus withUid:friendUid withFriendUid:myUid withFriendUsername:myUsername];
     
     //update my friend list
     [self updateStatus:myStatus withUid:myUid withFriendUid:friendUid withFriendUsername:friendUsername];
+    
+    if ([cellStatus isEqualToString:@"0"]) {
+        self.errorMessage.text = @"Already sent request";
+    } else if ([cellStatus isEqualToString:@"1"]) {
+        self.errorMessage.text = @"Accepted friend request";
+    } else if ([cellStatus isEqualToString:@"2"]) {
+        self.errorMessage.text = @"Sent game request";
+    } else if ([cellStatus isEqualToString:@"4"]) {
+        self.errorMessage.text = @"Accepted game request";
+    }
+    [self fadeErrorMessage];
 }
 
 @end
